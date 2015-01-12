@@ -4,20 +4,20 @@
 function MdGridListController($timeout) {
   this.invalidated = false;
   this.$timeout_ = $timeout;
-  this.renderDelegate;
+  this.layoutDelegate;
 }
 
-MdGridListController.prototype.invalidate = function(tile) {
+MdGridListController.prototype.invalidateLayout = function(tile) {
   if (this.invalidated) {
     return;
   }
   this.invalidated = true;
-  this.$timeout_(angular.bind(this, this.render));
+  this.$timeout_(angular.bind(this, this.layout));
 };
 
-MdGridListController.prototype.render = function() {
+MdGridListController.prototype.layout = function() {
   try {
-    this.renderDelegate();
+    this.layoutDelegate();
   } finally {
     this.invalidated = false;
   }
@@ -43,7 +43,7 @@ angular.module('gridTestApp')
           transitionDuration: 0
         });
 
-        ctrl.renderDelegate = function() {
+        ctrl.layoutDelegate = function() {
           mason.layout();
         };
       }

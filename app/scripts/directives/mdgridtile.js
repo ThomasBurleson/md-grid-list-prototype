@@ -32,10 +32,9 @@ angular.module('gridTestApp')
         });
 
         // Invalidate grid when tiles are added or removed
-        gridCtrl.invalidate();
-        scope.$on('$destroy', function() {
-          gridCtrl.invalidate();
-        });
+        var layoutFn = angular.bind(gridCtrl, gridCtrl.invalidateLayout);
+        layoutFn();
+        scope.$on('$destroy', layoutFn);
       }
     };
   });
