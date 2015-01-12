@@ -1,0 +1,78 @@
+<!doctype html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+  </head>
+  <body ng-app="gridTestApp">
+    <md-grid-list cols="6">
+      <md-grid-item rowspan="2" colspan="2">
+        Leaderboard
+      </md-grid-item>
+      <md-grid-item>
+        Food &amp; Drink
+      </md-grid-item>
+      <md-grid-item>
+        General Knowledge
+      </md-grid-item>
+      <md-grid-item rowspan="2">
+        History
+      </md-grid-item>
+      <md-grid-item rowspan="2" colspan="2">
+        Geography
+      </md-grid-item>
+      <md-grid-item>
+        Science &amp; Nature
+      </md-grid-item>
+      <md-grid-item>
+        TV &amp; Movies
+      </md-grid-item>
+      <md-grid-item>
+        Entertainment
+      </md-grid-item>
+      <md-grid-item>
+        Sports
+      </md-grid-item>
+      <md-grid-item>
+        Music
+      </md-grid-item>
+      <md-grid-item>
+        Profile
+      </md-grid-item>
+    </md-grid-list>
+
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/es5-shim/es5-shim.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/json3/lib/json3.js"></script>
+    <script src="bower_components/get-style-property/get-style-property.js"></script>
+    <script src="bower_components/get-size/get-size.js"></script>
+    <script src="bower_components/eventie/eventie.js"></script>
+    <script src="bower_components/doc-ready/doc-ready.js"></script>
+    <script src="bower_components/eventEmitter/EventEmitter.js"></script>
+    <script src="bower_components/matches-selector/matches-selector.js"></script>
+    <script src="bower_components/outlayer/item.js"></script>
+    <script src="bower_components/outlayer/outlayer.js"></script>
+    <script src="bower_components/masonry/masonry.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:js({.tmp,app}) scripts/scripts.js -->
+    <script src="scripts/app.js"></script>
+    <script src="scripts/controllers/main.js"></script>
+    <script src="scripts/directives/mdgriditem.js"></script>
+    <script src="scripts/directives/mdgridlist.js"></script>
+    <!-- endbuild -->
+</body>
+</html>
