@@ -8,10 +8,12 @@
  * Controller of the gridTestApp
  */
 angular.module('gridTestApp')
-  .controller('MainCtrl', function ($scope) {
-    $scope.awesomeThings = [
-      'HTML5 Boilerplate',
-      'AngularJS',
-      'Karma'
-    ];
+  .controller('MainCtrl', function($scope) {
+    this.actionInvoked = function(type) {
+      console.log('primary', type);
+    };
+
+    this.secondaryActionInvoked = function(type) {
+      console.log('secondary', type);
+    };
   });
