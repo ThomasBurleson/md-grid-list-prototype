@@ -8,16 +8,21 @@
  * # mdGridList
  */
 angular.module('gridTestApp')
-  .directive('mdGridList', function($$mdGridLayout) {
+  .directive('mdGridList', function($$mdGridLayout, $parse) {
     return {
       restrict: 'E',
       controller: MdGridListController,
       link: function postLink(scope, element, attrs, ctrl) {
+        // Lay out on attribute changes
+        var layoutFn = angular.bind(ctrl, ctrl.invalidateLayout);
+        attrs.$observe('cols', layoutFn);
+        attrs.$observe('rowHeight', layoutFn);
+
         ctrl.layoutDelegate = function() {
           $$mdGridLayout({
             container: element,
-            cols: parseInt(attrs['cols'], 10),
-            rowHeight: parseInt(attrs['rowHeight'], 10)
+            cols: $parse(attrs['cols'])(scope),
+            rowHeight: $parse(attrs['rowHeight'])(scope)
           });
         };
       }
