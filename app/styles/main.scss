@@ -87,42 +87,12 @@ md-grid-tile-content {
 }
 
 md-grid-list {
-  // TODO(shyndman): The following should be generated dynamically
-
-  &[cols='2'] {
-    $unitWidth: (100% / 2);
-    $unitHeight: 225px;
-
-    & > .grid-sizer,
-    & > md-grid-tile {
-      width: $unitWidth;
-      height: $unitHeight;
-    }
-  }
-
-  @media (min-width: $layout-breakpoint-md) {
-    &[lg-cols='6'] {
-      $unitWidth: (100% / 6);
-      $unitHeight: 225px;
-
-      & > .grid-sizer,
-      & > md-grid-tile {
-        width: $unitWidth;
-        height: $unitHeight;
-      }
-
-      & > md-grid-tile[lg-colspan='2'] {
-        width: $unitWidth * 2;
-      }
-
-      & > md-grid-tile[lg-rowspan='2'] {
-        height: $unitHeight * 2;
-      }
-    }
-  }
+  display: relative;
 }
 
 md-grid-tile {
+  position: absolute;
+
   > md-grid-tile-content {
     display: flex;
     align-items: center;

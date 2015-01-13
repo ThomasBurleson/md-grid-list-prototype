@@ -21,20 +21,26 @@ angular.module('gridTestApp')
         var secondaryContainer = element[0].querySelector('header, footer');
 
         element.on('click', function(e) {
-          // TODO(shyndman) - Replace this with a more appropriate descendent
-          // test
-          if (e.target == secondaryContainer ||
-              e.target.parentNode == secondaryContainer) {
-            scope.onSecondaryAction({$event: e});
-          } else {
-            scope.onAction({$event: e});
-          }
+          scope.$apply(function() {
+            // TODO(shyndman) - Replace this with a more appropriate descendent
+            // test
+            if (e.target == secondaryContainer ||
+                e.target.parentNode == secondaryContainer) {
+              scope.onSecondaryAction({$event: e});
+            } else {
+              scope.onAction({$event: e});
+            }
+          });
         });
 
         // Invalidate grid when tiles are added or removed
         var layoutFn = angular.bind(gridCtrl, gridCtrl.invalidateLayout);
-        layoutFn();
+        layoutFn(); // initial layout
         scope.$on('$destroy', layoutFn);
+
+        // If our colspan or rowspan changes, trigger a layout
+        attrs.$observe('colspan', layoutFn);
+        attrs.$observe('rowspan', layoutFn);
       }
     };
   });
