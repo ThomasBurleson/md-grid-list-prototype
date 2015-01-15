@@ -18,7 +18,10 @@ angular.module('gridTestApp')
       template: '<figure ng-transclude></figure>',
       transclude: true,
       link: function postLink(scope, element, attrs, gridCtrl) {
-        var secondaryContainer = element[0].querySelector('header, footer');
+        // Apply semantics
+        element.attr('role', 'listitem');
+
+        var secondaryContainer = element[0].querySelector('figcaption');
 
         element.on('click', function(e) {
           scope.$apply(function() {

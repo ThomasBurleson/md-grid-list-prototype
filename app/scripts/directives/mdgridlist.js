@@ -13,6 +13,9 @@ angular.module('gridTestApp')
       restrict: 'E',
       controller: MdGridListController,
       link: function postLink(scope, element, attrs, ctrl) {
+        // Apply semantics
+        element.attr('role', 'list');
+
         // Lay out on attribute changes
         var layoutFn = angular.bind(ctrl, ctrl.invalidateLayout);
         attrs.$observe('cols', layoutFn);
