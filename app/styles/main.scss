@@ -30,7 +30,7 @@ md-grid-tile {
   }
 }
 
-.leaderboard > md-grid-tile-content {
+.leaderboard > figure {
   background: #f5f5f5;
 
   @media (min-width: $layout-breakpoint-md) {
@@ -40,13 +40,13 @@ md-grid-tile {
     }
   }
 }
-.food > md-grid-tile-content {
+.food > figure {
   background: #b9f6ca;
 }
-.general > md-grid-tile-content {
+.general > figure {
   background: #ffff8d;
 }
-.history > md-grid-tile-content {
+.history > figure {
   background: #84ffff;
 
   @media (min-width: $layout-breakpoint-md) {
@@ -56,25 +56,25 @@ md-grid-tile {
     }
   }
 }
-.geography > md-grid-tile-content {
+.geography > figure {
   background: #ff8a80;
 }
-.science > md-grid-tile-content {
+.science > figure {
   background: #b9f6ca;
 }
-.tv > md-grid-tile-content {
+.tv > figure {
   background: #b388ff;
 }
-.entertainment > md-grid-tile-content {
+.entertainment > figure {
   background: #ff8a80;
 }
-.sports > md-grid-tile-content {
+.sports > figure {
   background: #b388ff;
 }
-.music > md-grid-tile-content {
+.music > figure {
   background: #84ffff;
 }
-.profile > md-grid-tile-content {
+.profile > figure {
   background: #f5f5f5;
 }
 

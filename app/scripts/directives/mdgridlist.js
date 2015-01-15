@@ -17,6 +17,7 @@ angular.module('gridTestApp')
         var layoutFn = angular.bind(ctrl, ctrl.invalidateLayout);
         attrs.$observe('cols', layoutFn);
         attrs.$observe('rowHeight', layoutFn);
+        attrs.$observe('gutter', layoutFn);
 
         ctrl.layoutDelegate = function() {
           $$mdGridLayout({
@@ -25,6 +26,10 @@ angular.module('gridTestApp')
             rowHeight: $parse(attrs['rowHeight'])(scope)
           });
         };
+
+        function getResponsiveCols() {
+
+        }
       }
     };
   })
@@ -67,6 +72,7 @@ angular.module('gridTestApp')
     var curRow = 0;
     var row = newRowArray();
 
+    console.profile('layout');
     tiles
         .map(function(t) {
           return angular.element(t);
@@ -76,6 +82,7 @@ angular.module('gridTestApp')
           var position = reserveSpace(spans);
           t.css(getStyles(position, spans));
         });
+    console.profileEnd('layout');
 
     function reserveSpace(spans) {
       var start = 0,
@@ -84,7 +91,8 @@ angular.module('gridTestApp')
       // TODO(shyndman): This loop isn't strictly necessary if you can determine
       // the minimum number of rows before a space opens up. To do this,
       // recognize that you've iterated across an entire row looking for space,
-      // and if so fast-forward by the minimum rowSpan count.
+      // and if so fast-forward by the minimum rowSpan count. Repeat until space
+      // opens up.
       while (end - start < spans.col) {
         if (curCol >= numCols) {
           nextRow();

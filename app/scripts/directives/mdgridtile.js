@@ -15,7 +15,7 @@ angular.module('gridTestApp')
         onAction: '&mdOnAction',
         onSecondaryAction: '&mdOnSecondaryAction'
       },
-      template: '<md-grid-tile-content ng-transclude></md-grid-tile-content>',
+      template: '<figure ng-transclude></figure>',
       transclude: true,
       link: function postLink(scope, element, attrs, gridCtrl) {
         var secondaryContainer = element[0].querySelector('header, footer');
