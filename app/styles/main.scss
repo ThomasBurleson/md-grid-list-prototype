@@ -7,12 +7,15 @@ html, body {
   font-family: 'Roboto', sans-serif;
   font-size: 14px;
   background: #424242;
-  margin: 0;
   height: 100%;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 // App styles
@@ -81,8 +84,7 @@ md-grid-tile {
 // Styles that approximate what will be generated
 
 md-grid-list,
-md-grid-tile,
-md-grid-tile-content {
+md-grid-tile {
   display: block;
 }
 
@@ -93,7 +95,7 @@ md-grid-list {
 md-grid-tile {
   position: absolute;
 
-  > md-grid-tile-content {
+  > figure {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -101,8 +103,7 @@ md-grid-tile {
     position: relative;
 
     // Headers & footers
-    > header,
-    > footer {
+    > figcaption {
       display: flex;
       flex-direction: row;
       align-items: center;
@@ -130,11 +131,11 @@ md-grid-tile {
       }
     }
 
-    > header {
+    > figcaption.top {
       top: 0;
     }
 
-    > footer {
+    > figcaption.bottom {
       bottom: 0;
     }
   }
