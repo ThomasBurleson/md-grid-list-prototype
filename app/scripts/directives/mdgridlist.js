@@ -48,7 +48,7 @@ angular.module('gridTestApp')
           var tiles = element[0].querySelectorAll('md-grid-tile');
           var colCount = getColumnCount();
           var rowHeight = getRowHeight();
-          console.time('layout incl. DOM');
+          // console.time('layout incl. DOM');
           $$mdGridLayout({
             tileSpans: getTileSpans(),
             colCount: colCount,
@@ -57,7 +57,7 @@ angular.module('gridTestApp')
             angular.element(tiles[i]).css(
               getStyles(ps.position, ps.spans, colCount, rowHeight));
           });
-          console.timeEnd('layout incl. DOM');
+          // console.timeEnd('layout incl. DOM');
         };
 
         function getStyles(position, spans, colCount, rowHeight) {
@@ -143,14 +143,14 @@ angular.module('gridTestApp')
     var curRow = 0;
     var row = newRowArray();
 
-    console.time('grid layout');
+    // console.time('grid layout');
     var positioning = tileSpans.map(function(spans) {
       return {
         spans: spans,
         position: reserveSpace(spans)
       };
     });
-    console.timeEnd('grid layout');
+    // console.timeEnd('grid layout');
     return positioning;
 
     function reserveSpace(spans) {
