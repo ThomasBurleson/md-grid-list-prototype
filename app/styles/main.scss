@@ -18,14 +18,77 @@ html, body {
   padding: 0;
 }
 
+
+// Styles that approximate what will be generated
+
+md-grid-list,
+md-grid-tile {
+  display: block;
+}
+
+md-grid-list {
+  position: relative;
+}
+
+md-grid-tile {
+  position: absolute;
+
+  > figure {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    // Headers & footers
+    > figcaption {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      height: 48px;
+      position: absolute;
+      left: 0;
+      right: 0;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.18);
+      overflow: hidden;
+
+      > h3,
+      > h4 {
+        font-weight: 400;
+        margin: 0 0 0 16px;
+      }
+
+      > h3 {
+        font-size: 14px;
+      }
+
+      > h4 {
+        font-size: 12px;
+      }
+    }
+
+    > figcaption.top {
+      top: 0;
+    }
+
+    > figcaption.bottom {
+      bottom: 0;
+    }
+  }
+}
+
 // App styles
 
 md-grid-list {
 }
 
 md-grid-tile {
-  padding: 4px;
-
   svg {
     width: 70%;
     height: 70%;
@@ -81,62 +144,3 @@ md-grid-tile {
   background: #f5f5f5;
 }
 
-// Styles that approximate what will be generated
-
-md-grid-list,
-md-grid-tile {
-  display: block;
-}
-
-md-grid-list {
-  display: relative;
-}
-
-md-grid-tile {
-  position: absolute;
-
-  > figure {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    position: relative;
-
-    // Headers & footers
-    > figcaption {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-
-      height: 48px;
-      position: absolute;
-      left: 0;
-      right: 0;
-      color: #fff;
-      background: rgba(0, 0, 0, 0.18);
-      overflow: hidden;
-
-      > h3,
-      > h4 {
-        font-weight: 400;
-        margin: 0 0 0 16px;
-      }
-
-      > h3 {
-        font-size: 14px;
-      }
-
-      > h4 {
-        font-size: 12px;
-      }
-    }
-
-    > figcaption.top {
-      top: 0;
-    }
-
-    > figcaption.bottom {
-      bottom: 0;
-    }
-  }
-}

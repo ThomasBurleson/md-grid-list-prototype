@@ -22,7 +22,7 @@ angular.module('gridTestApp')
          */
         function watchMedia() {
           $mdUtil.watchResponsiveAttributes(
-              ['cols', 'ratio'], attrs, layoutIfMediaMatch);
+              ['cols', 'row-height'], attrs, layoutIfMediaMatch);
           for (var mediaName in $mdConstants.MEDIA) {
             // TODO(shyndman): It would be nice to only layout if we have
             // instances of attributes using this media type
@@ -45,30 +45,56 @@ angular.module('gridTestApp')
           }
         }
 
-        // Lay out on attribute changes
+        /**
+         * Invokes the layout engine, and uses its results to lay out our
+         * tile elements.
+         */
         ctrl.layoutDelegate = function() {
-          var tiles = element[0].querySelectorAll('md-grid-tile');
+          var tiles = getTileElements();
           var colCount = getColumnCount();
+          var rowMode = getRowMode();
           var rowHeight = getRowHeight();
           // console.time('layout incl. DOM');
           $$mdGridLayout({
             tileSpans: getTileSpans(),
-            colCount: colCount,
-            rowHeight: rowHeight
+            colCount: colCount
           }).forEach(function(ps, i) {
             angular.element(tiles[i]).css(
-              getStyles(ps.position, ps.spans, colCount, rowHeight));
+              getStyles(ps.position, ps.spans, colCount, rowMode, rowHeight));
           });
           // console.timeEnd('layout incl. DOM');
         };
 
-        function getStyles(position, spans, colCount, rowHeight) {
-          return {
-            width: ((spans.col / colCount) * 100) + '%',
-            height: spans.row * rowHeight + 'px',
-            left: ((position.col / colCount) * 100) + '%',
-            top: position.row * rowHeight + 'px'
+        function getStyles(position, spans, colCount, rowMode, rowHeight) {
+          var colPercentWidth = (1 / colCount) * 100;
+          var base = {
+            // shared styles between row modes
+            width: spans.col * colPercentWidth + '%',
+            left: position.col * colPercentWidth + '%',
+            // resets
+            paddingTop: '',
+            marginTop: '',
+            top: '',
+            height: ''
           };
+
+          if (rowMode == 'fixed') {
+            return angular.extend(base, {
+              top: position.row * rowHeight + 'px',
+              height: spans.row * rowHeight + 'px'
+            });
+          } else { // rowMode == 'ratio'
+            var hwRatio = 1 / rowHeight; // flip width and height
+            var rowPercentHeight = colPercentWidth * hwRatio; // as percentage of width
+            return angular.extend(base, {
+              paddingTop: spans.row * rowPercentHeight + '%',
+              marginTop: position.row * rowPercentHeight + '%'
+            });
+          }
+        }
+
+        function getTileElements() {
+          return element[0].querySelectorAll('md-grid-tile');
         }
 
         function getTileSpans() {
@@ -86,8 +112,20 @@ angular.module('gridTestApp')
           return parseInt($mdUtil.getResponsiveAttribute(attrs, 'cols'), 10);
         }
 
+        function getRowMode() {
+          var rowHeight = $mdUtil.getResponsiveAttribute(attrs, 'row-height');
+          return rowHeight.indexOf(':') !== -1 ?
+              'ratio' : 'fixed';
+        }
+
         function getRowHeight() {
-          return parseInt($mdUtil.getResponsiveAttribute(attrs, 'row-height'), 10);
+          var rowHeight = $mdUtil.getResponsiveAttribute(attrs, 'row-height');
+          if (rowHeight.indexOf(':') === -1) {
+            return parseInt(rowHeight, 10);
+          } else {
+            var whRatio = rowHeight.split(':');
+            return parseFloat(whRatio[0]) / parseFloat(whRatio[1]);
+          }
         }
       }
     };
