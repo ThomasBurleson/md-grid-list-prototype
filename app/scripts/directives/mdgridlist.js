@@ -9,7 +9,7 @@
  */
 angular.module('gridTestApp')
   .directive('mdGridList', function(
-      $$mdGridLayout, $mdConstants, $mdMedia, $mdUtil, $parse) {
+      $$mdGridLayout, $mdConstants, $mdMedia, $mdUtil) {
     return {
       restrict: 'E',
       controller: MdGridListController,
@@ -54,23 +54,40 @@ angular.module('gridTestApp')
           var colCount = getColumnCount();
           var rowMode = getRowMode();
           var rowHeight = getRowHeight();
+          var gutter = getGutter();
           // console.time('layout incl. DOM');
           $$mdGridLayout({
             tileSpans: getTileSpans(),
             colCount: colCount
           }).forEach(function(ps, i) {
             angular.element(tiles[i]).css(
-              getStyles(ps.position, ps.spans, colCount, rowMode, rowHeight));
+              getStyles(ps.position, ps.spans, colCount, gutter, rowMode, rowHeight));
           });
           // console.timeEnd('layout incl. DOM');
         };
 
-        function getStyles(position, spans, colCount, rowMode, rowHeight) {
+        function getStyles(position, spans, colCount, gutter, rowMode, rowHeight) {
           var colPercentWidth = (1 / colCount) * 100;
-          var base = {
+          var gutterStep = colCount == 1 ? 0 : (gutter * (colCount - 1) / colCount);
+
+          var unitWidth =
+              $calc.subtract(
+                  $calc.percent(colPercentWidth),
+                  $calc.px(gutterStep));
+          var width =
+              $calc.add(
+                $calc.subtract(
+                  $calc.percent(spans.col * colPercentWidth),
+                  $calc.px(gutterStep)
+                ),
+                $calc.px((spans.col - 1) * gutter));
+
+          var baseStyle = {
             // shared styles between row modes
-            width: spans.col * colPercentWidth + '%',
-            left: position.col * colPercentWidth + '%',
+            width: 'calc(' + width + ')',
+            left: 'calc(' +
+                (position.col + ' * (' + unitWidth + ')') +
+                ' + ' + (position.col * gutter) + 'px)',
             // resets
             paddingTop: '',
             marginTop: '',
@@ -78,17 +95,22 @@ angular.module('gridTestApp')
             height: ''
           };
 
+          console.log(baseStyle.left);
+
           if (rowMode == 'fixed') {
-            return angular.extend(base, {
-              top: position.row * rowHeight + 'px',
+            return angular.extend(baseStyle, {
+              top: (position.row * rowHeight) + (position.row * gutter) + 'px',
               height: spans.row * rowHeight + 'px'
             });
           } else { // rowMode == 'ratio'
             var hwRatio = 1 / rowHeight; // flip width and height
             var rowPercentHeight = colPercentWidth * hwRatio; // as percentage of width
-            return angular.extend(base, {
-              paddingTop: spans.row * rowPercentHeight + '%',
-              marginTop: position.row * rowPercentHeight + '%'
+            return angular.extend(baseStyle, {
+              paddingTop: (spans.row * rowPercentHeight) + '%',
+              marginTop: 'calc(' +
+                    (position.row * rowPercentHeight) + '%' +
+                    ' + ' + (position.row * gutter) + 'px' +
+                  ')'
             });
           }
         }
@@ -116,6 +138,10 @@ angular.module('gridTestApp')
           var rowHeight = $mdUtil.getResponsiveAttribute(attrs, 'row-height');
           return rowHeight.indexOf(':') !== -1 ?
               'ratio' : 'fixed';
+        }
+
+        function getGutter() {
+          return parseInt($mdUtil.getResponsiveAttribute(attrs, 'gutter'), 10);
         }
 
         function getRowHeight() {
