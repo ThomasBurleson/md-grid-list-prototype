@@ -24,6 +24,8 @@ angular.module('gridTestApp')
           $mdUtil.watchResponsiveAttributes(
               ['cols', 'ratio'], attrs, layoutIfMediaMatch);
           for (var mediaName in $mdConstants.MEDIA) {
+            // TODO(shyndman): It would be nice to only layout if we have
+            // instances of attributes using this media type
             $mdMedia.queries[mediaName].addListener(
                 angular.bind(ctrl, ctrl.invalidateLayout));
           }
@@ -35,8 +37,8 @@ angular.module('gridTestApp')
          */
         function layoutIfMediaMatch(mediaName) {
           if (mediaName == null) {
-            // This should really check whether we're using the fallback, rather
-            // than indiscriminately invalidate layout
+            // TODO(shyndman): It would be nice to only layout if we have
+            // instances of attributes using this media type
             ctrl.invalidateLayout();
           } else if ($mdMedia.queries[mediaName].matches) {
             ctrl.invalidateLayout();

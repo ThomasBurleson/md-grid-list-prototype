@@ -9,11 +9,4 @@
  */
 angular.module('gridTestApp')
   .controller('MainCtrl', function($scope) {
-    this.actionInvoked = function(type) {
-      console.log('primary', type);
-    };
-
-    this.secondaryActionInvoked = function(type) {
-      console.log('secondary', type);
-    };
   });
