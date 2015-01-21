@@ -8,30 +8,82 @@
  * # mdGridList
  */
 angular.module('gridTestApp')
-  .directive('mdGridList', function($$mdGridLayout, $parse) {
+  .directive('mdGridList', function(
+      $$mdGridLayout, $mdConstants, $mdMedia, $mdUtil, $parse) {
     return {
       restrict: 'E',
       controller: MdGridListController,
       link: function postLink(scope, element, attrs, ctrl) {
-        // Apply semantics
-        element.attr('role', 'list');
+        element.attr('role', 'list'); // Apply semantics
+        watchMedia();
+
+        /**
+         * Watches for changes in media, invalidating layout as necessary.
+         */
+        function watchMedia() {
+          $mdUtil.watchResponsiveAttributes(
+              ['cols', 'ratio'], attrs, layoutIfMediaMatch);
+          for (var mediaName in $mdConstants.MEDIA) {
+            $mdMedia.queries[mediaName].addListener(
+                angular.bind(ctrl, ctrl.invalidateLayout));
+          }
+        }
+
+        /**
+         * Performs grid layout if the provided mediaName matches the currently
+         * active media type.
+         */
+        function layoutIfMediaMatch(mediaName) {
+          if (mediaName == null) {
+            // This should really check whether we're using the fallback, rather
+            // than indiscriminately invalidate layout
+            ctrl.invalidateLayout();
+          } else if ($mdMedia.queries[mediaName].matches) {
+            ctrl.invalidateLayout();
+          }
+        }
 
         // Lay out on attribute changes
-        var layoutFn = angular.bind(ctrl, ctrl.invalidateLayout);
-        attrs.$observe('cols', layoutFn);
-        attrs.$observe('rowHeight', layoutFn);
-        attrs.$observe('gutter', layoutFn);
-
         ctrl.layoutDelegate = function() {
+          var tiles = element[0].querySelectorAll('md-grid-tile');
+          var colCount = getColumnCount();
+          var rowHeight = getRowHeight();
           $$mdGridLayout({
-            container: element,
-            cols: $parse(attrs['cols'])(scope),
-            rowHeight: $parse(attrs['rowHeight'])(scope)
+            tileSpans: getTileSpans(),
+            colCount: colCount,
+            rowHeight: rowHeight
+          }).forEach(function(ps, i) {
+            angular.element(tiles[i]).css(
+              getStyles(ps.position, ps.spans, colCount, rowHeight));
           });
         };
 
-        function getResponsiveCols() {
+        function getStyles(position, spans, colCount, rowHeight) {
+          return {
+            width: ((spans.col / colCount) * 100) + '%',
+            height: spans.row * rowHeight + 'px',
+            left: ((position.col / colCount) * 100) + '%',
+            top: position.row * rowHeight + 'px'
+          };
+        }
 
+        function getTileSpans() {
+          return ctrl.tiles.map(function(tileAttrs) {
+            return {
+              row: parseInt(
+                  $mdUtil.getResponsiveAttribute(tileAttrs, 'rowspan'), 10) || 1,
+              col: parseInt(
+                  $mdUtil.getResponsiveAttribute(tileAttrs, 'colspan'), 10) || 1
+            };
+          });
+        }
+
+        function getColumnCount() {
+          return parseInt($mdUtil.getResponsiveAttribute(attrs, 'cols'), 10);
+        }
+
+        function getRowHeight() {
+          return parseInt($mdUtil.getResponsiveAttribute(attrs, 'row-height'), 10);
         }
       }
     };
@@ -46,8 +98,23 @@ angular.module('gridTestApp')
   function MdGridListController($timeout) {
     this.invalidated = false;
     this.$timeout_ = $timeout;
+    this.tiles = [];
     this.layoutDelegate;
   }
+
+  MdGridListController.prototype.addTile = function(tileAttrs) {
+    this.tiles.push(tileAttrs);
+    this.invalidateLayout();
+  };
+
+  MdGridListController.prototype.removeTile = function(tileAttrs) {
+    var idx = this.tiles.indexOf(tileAttrs);
+    if (idx === -1) {
+      return;
+    }
+    this.tiles.splice(idx, 1);
+    this.invalidateLayout();
+  };
 
   MdGridListController.prototype.invalidateLayout = function(tile) {
     if (this.invalidated) {
@@ -68,24 +135,21 @@ angular.module('gridTestApp')
 
   // Grid layout
   function layoutGrid(options) {
-    var tiles = Array.prototype.slice.call(
-        options.container[0].querySelectorAll('md-grid-tile'));
-    var numCols = options.cols;
+    var tileSpans = options.tileSpans;
+    var colCount = options.colCount;
     var curCol = 0;
     var curRow = 0;
     var row = newRowArray();
 
-    console.profile('layout');
-    tiles
-        .map(function(t) {
-          return angular.element(t);
-        })
-        .forEach(function(t) {
-          var spans = getSpans(t);
-          var position = reserveSpace(spans);
-          t.css(getStyles(position, spans));
-        });
-    console.profileEnd('layout');
+    console.time('grid layout');
+    var positioning = tileSpans.map(function(spans) {
+      return {
+        spans: spans,
+        position: reserveSpace(spans)
+      };
+    });
+    console.timeEnd('grid layout');
+    return positioning;
 
     function reserveSpace(spans) {
       var start = 0,
@@ -97,19 +161,19 @@ angular.module('gridTestApp')
       // and if so fast-forward by the minimum rowSpan count. Repeat until space
       // opens up.
       while (end - start < spans.col) {
-        if (curCol >= numCols) {
+        if (curCol >= colCount) {
           nextRow();
           continue;
         }
 
         start = row.indexOf(0, curCol);
-        if (start == -1) {
+        if (start === -1) {
           nextRow();
           continue;
         }
 
         end = findEnd(start + 1);
-        if (end == -1) {
+        if (end === -1) {
           nextRow();
           continue;
         }
@@ -129,9 +193,7 @@ angular.module('gridTestApp')
     function nextRow() {
       curCol = 0;
       curRow++;
-      adjustRow(0, numCols, -1); // Decrement row spans by one
-
-      console.log('row(' + curRow + '):', row);
+      adjustRow(0, colCount, -1); // Decrement row spans by one
     }
 
     function adjustRow(from, cols, by) {
@@ -143,38 +205,22 @@ angular.module('gridTestApp')
     function findEnd(start) {
       var i;
       for (i = start; i < row.length; i++) {
-        if (row[i] != 0) {
+        if (row[i] !== 0) {
           return i;
         }
       }
 
-      if (i == row.length) {
+      if (i === row.length) {
         return i;
       }
     }
 
     function newRowArray() {
       var tracker = [];
-      for (var i = 0; i < numCols; i++) {
+      for (var i = 0; i < colCount; i++) {
         tracker.push(0);
       }
       return tracker;
-    }
-
-    function getSpans(t) {
-      return {
-        col: parseInt(t.attr('colspan'), 10) || 1,
-        row: parseInt(t.attr('rowspan'), 10) || 1
-      };
-    }
-
-    function getStyles(position, spans) {
-      return {
-        width: ((spans.col / numCols) * 100) + '%',
-        height: spans.row * options.rowHeight + 'px',
-        left: ((position.col / numCols) * 100) + '%',
-        top: position.row * options.rowHeight + 'px'
-      };
     }
   }
 })();

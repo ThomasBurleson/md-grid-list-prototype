@@ -7,43 +7,27 @@
  * # mdGridItem
  */
 angular.module('gridTestApp')
-  .directive('mdGridTile', function() {
+  .directive('mdGridTile', function($mdUtil) {
     return {
       restrict: 'E',
       require: '^mdGridList',
-      scope: {
-        onAction: '&mdOnAction',
-        onSecondaryAction: '&mdOnSecondaryAction'
-      },
+      scope: {},
       template: '<figure ng-transclude></figure>',
       transclude: true,
       link: function postLink(scope, element, attrs, gridCtrl) {
         // Apply semantics
         element.attr('role', 'listitem');
 
-        var secondaryContainer = element[0].querySelector('figcaption');
-
-        element.on('click', function(e) {
-          scope.$apply(function() {
-            // TODO(shyndman) - Replace this with a more appropriate descendent
-            // test
-            if (e.target == secondaryContainer ||
-                e.target.parentNode == secondaryContainer) {
-              scope.onSecondaryAction({$event: e});
-            } else {
-              scope.onAction({$event: e});
-            }
-          });
-        });
-
-        // Invalidate grid when tiles are added or removed
-        var layoutFn = angular.bind(gridCtrl, gridCtrl.invalidateLayout);
-        layoutFn(); // initial layout
-        scope.$on('$destroy', layoutFn);
+        // Tile registration/deregistration
+        // FIXME(shyndman): This will only handle appends. We need to consider
+        //    inserts as well.
+        gridCtrl.addTile(attrs);
+        scope.$on('$destroy', angular.bind(gridCtrl, gridCtrl.removeTile, attrs));
 
         // If our colspan or rowspan changes, trigger a layout
-        attrs.$observe('colspan', layoutFn);
-        attrs.$observe('rowspan', layoutFn);
+        $mdUtil.watchResponsiveAttributes(
+            ['colspan', 'rowspan'], attrs,
+            angular.bind(gridCtrl, gridCtrl.invalidateLayout));
       }
     };
   });
