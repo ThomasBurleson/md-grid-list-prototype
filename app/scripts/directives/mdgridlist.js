@@ -9,7 +9,9 @@
  */
 angular.module('gridTestApp')
   .directive('mdGridList', function(
-      $$mdGridLayout, $calc, $mdConstants, $mdMedia, $mdUtil) {
+      $$mdGridLayout, $mdCalc, $mdConstants, $mdMedia, $mdUtil) {
+    var c = $mdCalc;
+
     return {
       restrict: 'E',
       controller: MdGridListController,
@@ -70,24 +72,24 @@ angular.module('gridTestApp')
           var colPercentWidth = (1 / colCount) * 100;
           var gutterStep = colCount == 1 ? 0 : (gutter * (colCount - 1) / colCount);
 
-          var unitWidth =
-              $calc.subtract(
-                  $calc.percent(colPercentWidth),
-                  $calc.px(gutterStep));
-          var width =
-              $calc.add(
-                $calc.subtract(
-                  $calc.percent(spans.col * colPercentWidth),
-                  $calc.px(gutterStep)
-                ),
-                $calc.px((spans.col - 1) * gutter));
+          // Ugh, makes you wish for operator overloading
+          var unitWidth = c.subtract(
+              c.percent(colPercentWidth),
+              c.px(gutterStep));
+          var left = c.add(
+              c.mult(position.col, unitWidth),
+              c.px(position.col * gutter));
+          var width = c.add(
+              c.subtract(
+                c.percent(spans.col * colPercentWidth),
+                c.px(spans.col * gutterStep)
+              ),
+              c.px((spans.col - 1) * gutter));
 
           var baseStyle = {
             // shared styles between row modes
             width: 'calc(' + width + ')',
-            left: 'calc(' +
-                (position.col + ' * (' + unitWidth + ')') +
-                ' + ' + (position.col * gutter) + 'px)',
+            left: 'calc(' + left + ')',
             // resets
             paddingTop: '',
             marginTop: '',
@@ -95,22 +97,23 @@ angular.module('gridTestApp')
             height: ''
           };
 
-          console.log(baseStyle.left);
-
           if (rowMode == 'fixed') {
             return angular.extend(baseStyle, {
               top: (position.row * rowHeight) + (position.row * gutter) + 'px',
               height: spans.row * rowHeight + 'px'
             });
           } else { // rowMode == 'ratio'
-            var hwRatio = 1 / rowHeight; // flip width and height
-            var rowPercentHeight = colPercentWidth * hwRatio; // as percentage of width
+            var rowPercentHeight = colPercentWidth * (1 / rowHeight);
+            var paddingTop = c.add(
+                c.percent(spans.row * rowPercentHeight),
+                c.px((spans.row - 1) * gutter));
+            var marginTop = c.add(
+                c.percent(position.row * rowPercentHeight),
+                c.px(position.row * gutter));
+
             return angular.extend(baseStyle, {
-              paddingTop: (spans.row * rowPercentHeight) + '%',
-              marginTop: 'calc(' +
-                    (position.row * rowPercentHeight) + '%' +
-                    ' + ' + (position.row * gutter) + 'px' +
-                  ')'
+              paddingTop: 'calc(' + paddingTop + ')',
+              marginTop: 'calc(' + marginTop + ')'
             });
           }
         }
