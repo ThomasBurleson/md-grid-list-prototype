@@ -85,7 +85,35 @@ md-grid-tile {
 
 // App styles
 
-md-grid-list {
+nav {
+  background: #00bad4;
+  margin-bottom: 8px;
+
+  > ul {
+    display: flex;
+    flex-direction: horizontal;
+    list-style-type: none;
+
+    > li {
+      font-family: 'Roboto', sans-serif;
+      padding: 8px 16px;
+      font-size: 14px;
+      border: 0;
+      text-transform: uppercase;
+      background: none;
+      color: #424242;
+    }
+
+    a {
+      cursor: pointer;
+      color: white;
+    }
+  }
+}
+
+p {
+  color: #fafafa;
+  margin: 8px 16px;
 }
 
 md-grid-tile {
@@ -96,7 +124,7 @@ md-grid-tile {
   }
 }
 
-.leaderboard > figure {
+.leaderboard {
   background: #f5f5f5;
 
   @media (min-width: $layout-breakpoint-md) {
@@ -106,13 +134,13 @@ md-grid-tile {
     }
   }
 }
-.food > figure {
+.food {
   background: #b9f6ca;
 }
-.general > figure {
+.general {
   background: #ffff8d;
 }
-.history > figure {
+.history {
   background: #84ffff;
 
   @media (min-width: $layout-breakpoint-md) {
@@ -122,25 +150,25 @@ md-grid-tile {
     }
   }
 }
-.geography > figure {
+.geography {
   background: #ff8a80;
 }
-.science > figure {
+.science {
   background: #b9f6ca;
 }
-.tv > figure {
+.tv {
   background: #b388ff;
 }
-.entertainment > figure {
+.entertainment {
   background: #ff8a80;
 }
-.sports > figure {
+.sports {
   background: #b388ff;
 }
-.music > figure {
+.music {
   background: #84ffff;
 }
-.profile > figure {
+.profile {
   background: #f5f5f5;
 }
 

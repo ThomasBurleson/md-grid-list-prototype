@@ -15,6 +15,9 @@ angular.module('gridTestApp')
     return {
       restrict: 'E',
       controller: MdGridListController,
+      scope: {
+        onLayout: '&'
+      },
       link: function postLink(scope, element, attrs, ctrl) {
         element.attr('role', 'list'); // Apply semantics
         watchMedia();
@@ -57,15 +60,33 @@ angular.module('gridTestApp')
           var rowMode = getRowMode();
           var rowHeight = getRowHeight();
           var gutter = getGutter();
-          // console.time('layout incl. DOM');
-          $$mdGridLayout({
-            tileSpans: getTileSpans(),
-            colCount: colCount
-          }).forEach(function(ps, i) {
-            angular.element(tiles[i]).css(
-              getStyles(ps.position, ps.spans, colCount, gutter, rowMode, rowHeight));
+          var layoutTime;
+          var totalTime =
+              $mdUtil.time(function() {
+                var layoutInfo;
+                layoutTime = $mdUtil.time(function() {
+                  layoutInfo = $$mdGridLayout({
+                    tileSpans: getTileSpans(),
+                    colCount: colCount
+                  });
+                });
+                layoutInfo.forEach(function(ps, i) {
+                  angular.element(tiles[i]).css(
+                    getStyles(ps.position, ps.spans, colCount, gutter, rowMode, rowHeight));
+                });
+              });
+
+          // Report layout
+          scope.onLayout({
+            $event: {
+              performance: {
+                tileCount: ctrl.tiles.length,
+                totalTime: totalTime,
+                layoutTime: layoutTime,
+                domTime: totalTime - layoutTime
+              }
+            }
           });
-          // console.timeEnd('layout incl. DOM');
         };
 
         function getStyles(position, spans, colCount, gutter, rowMode, rowHeight) {

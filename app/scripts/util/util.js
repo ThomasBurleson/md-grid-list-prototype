@@ -45,11 +45,18 @@ function mdMediaFactory($mdConstants, $window) {
 }
 
 
-function mdUtilFactory($mdConstants, $mdMedia) {
+function mdUtilFactory($mdConstants, $mdMedia, $window) {
   return {
+    time: time,
     watchResponsiveAttributes: watchResponsiveAttributes,
     getResponsiveAttribute: getResponsiveAttribute
   };
+
+  function time(cb) {
+    var start = $window.performance.now();
+    cb();
+    return $window.performance.now() - start;
+  }
 
   function getResponsiveAttribute(attrs, attrName) {
     for (var i = 0; i < $mdConstants.MEDIA_PRIORITY.length; i++) {
