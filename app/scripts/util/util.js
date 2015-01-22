@@ -4,7 +4,8 @@
 angular.module('gridTestApp')
     .factory('$mdConstants', mdConstantFactory)
     .factory('$mdMedia', mdMediaFactory)
-    .factory('$mdUtil', mdUtilFactory);
+    .factory('$mdUtil', mdUtilFactory)
+    .factory('$calc', mdCalcFactory);
 
 
 function mdConstantFactory() {
@@ -91,6 +92,24 @@ function mdUtilFactory($mdConstants, $mdMedia) {
     return function unwatch() {
       unwatchFns.forEach(function(fn) { fn(); })
     };
+  }
+}
+
+
+function mdCalcFactory() {
+  return {
+    px: angular.bind(void 0, unit, 'px'),
+    percent: angular.bind(void 0, unit, '%'),
+    add: angular.bind(void 0, binary, '+'),
+    subtract: angular.bind(void 0, binary, '-')
+  };
+
+  function unit(unit, value) {
+    return value + unit;
+  }
+
+  function binary(operator, a, b) {
+    return a + ' ' + operator + ' ' + b;
   }
 }
 

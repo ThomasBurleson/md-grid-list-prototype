@@ -9,7 +9,7 @@
  */
 angular.module('gridTestApp')
   .directive('mdGridList', function(
-      $$mdGridLayout, $mdConstants, $mdMedia, $mdUtil) {
+      $$mdGridLayout, $calc, $mdConstants, $mdMedia, $mdUtil) {
     return {
       restrict: 'E',
       controller: MdGridListController,
