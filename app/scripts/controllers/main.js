@@ -25,10 +25,9 @@ angular.module('gridTestApp')
     })();
 
     this.onLayout = function(e) {
-      console.log('hit', e, arguments);
-      this.totalTime = e.performance.totalTime.toFixed(2);
-      this.layoutTime = e.performance.layoutTime.toFixed(2);
-      this.domTime = e.performance.domTime.toFixed(2);
+      this.totalTime = e.performance.totalTime.toFixed(3);
+      this.layoutTime = e.performance.layoutTime.toFixed(3);
+      this.domTime = e.performance.domTime.toFixed(3);
       this.tileCount = e.performance.tileCount;
     };
 

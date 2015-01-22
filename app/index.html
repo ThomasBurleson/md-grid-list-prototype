@@ -25,7 +25,10 @@
       </nav>
       <p>
         {{mainCtrl.tileCount}} tiles rendered in {{mainCtrl.totalTime}}ms
-        (layout: {{mainCtrl.layoutTime}}ms, dom: {{mainCtrl.domTime}}ms)</p>
+        <span class="hint">
+          (layout: {{mainCtrl.layoutTime}}ms, dom: {{mainCtrl.domTime}}ms)
+        </span>
+      </p>
       <div ng-switch="mainCtrl.demo">
         <section ng-switch-when="topeka">
           <md-grid-list
