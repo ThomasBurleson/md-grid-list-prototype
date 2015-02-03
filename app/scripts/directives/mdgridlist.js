@@ -117,7 +117,7 @@ angular.module('gridTestApp')
               ),
               c.px((spans.col - 1) * gutter));
 
-          var baseStyle = {
+          var style = {
             // shared styles between row modes
             width: 'calc(' + width + ')',
             left: 'calc(' + left + ')',
@@ -129,10 +129,8 @@ angular.module('gridTestApp')
           };
 
           if (rowMode == 'fixed') {
-            return angular.extend(baseStyle, {
-              top: (position.row * rowHeight) + (position.row * gutter) + 'px',
-              height: spans.row * rowHeight + 'px'
-            });
+            style['top'] = (position.row * rowHeight) + (position.row * gutter) + 'px';
+            style['height'] = spans.row * rowHeight + 'px';
           } else { // rowMode == 'ratio'
             var rowPercentHeight = colPercentWidth * (1 / rowHeight);
             var paddingTop = c.add(
@@ -142,11 +140,11 @@ angular.module('gridTestApp')
                 c.percent(position.row * rowPercentHeight),
                 c.px(position.row * gutter));
 
-            return angular.extend(baseStyle, {
-              paddingTop: 'calc(' + paddingTop + ')',
-              marginTop: 'calc(' + marginTop + ')'
-            });
+            style['paddingTop'] = 'calc(' + paddingTop + ')';
+            style['marginTop'] = 'calc(' + marginTop + ')';
           }
+
+          return style;
         }
 
         function getTileElements() {
