@@ -46,6 +46,8 @@ function mdMediaFactory($mdConstants, $window) {
 
 
 function mdUtilFactory($mdConstants, $mdMedia, $window) {
+  var normalizeCache = {};
+
   return {
     time: time,
     watchResponsiveAttributes: watchResponsiveAttributes,
@@ -65,7 +67,7 @@ function mdUtilFactory($mdConstants, $mdMedia, $window) {
         continue;
       }
 
-      var normalizedName = attrs.$normalize(mediaName + '-' + attrName);
+      var normalizedName = getNormalizedName(attrs, mediaName + '-' + attrName);
       if (attrs[normalizedName]) {
         return attrs[normalizedName];
       }
@@ -85,7 +87,7 @@ function mdUtilFactory($mdConstants, $mdMedia, $window) {
       }
 
       for (var mediaName in $mdConstants.MEDIA) {
-        normalizedName = attrs.$normalize(mediaName + '-' + attrName);
+        var normalizedName = getNormalizedName(attrs, mediaName + '-' + attrName);
         if (!attrs[normalizedName]) {
           return;
         }
@@ -99,6 +101,11 @@ function mdUtilFactory($mdConstants, $mdMedia, $window) {
     return function unwatch() {
       unwatchFns.forEach(function(fn) { fn(); })
     };
+  }
+
+  function getNormalizedName(attrs, attrName) {
+    return normalizeCache[attrName] ||
+        (normalizeCache[attrName] = attrs.$normalize(attrName));
   }
 }
 

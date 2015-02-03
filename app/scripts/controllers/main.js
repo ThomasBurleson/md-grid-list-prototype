@@ -25,6 +25,8 @@ angular.module('gridTestApp')
     })();
 
     this.onLayout = function(e) {
+      console.log(e.performance.layoutTime + ',' + e.performance.domTime);
+
       this.totalTime = e.performance.totalTime.toFixed(3);
       this.layoutTime = e.performance.layoutTime.toFixed(3);
       this.domTime = e.performance.domTime.toFixed(3);

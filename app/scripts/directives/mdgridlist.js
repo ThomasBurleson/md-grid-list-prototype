@@ -20,19 +20,29 @@ angular.module('gridTestApp')
       },
       link: function postLink(scope, element, attrs, ctrl) {
         element.attr('role', 'list'); // Apply semantics
+        var invalidateLayout = angular.bind(ctrl, ctrl.invalidateLayout);
+        var unwatchAttrs;
+
         watchMedia();
+        scope.$on('$destroy', unwatchMedia);
 
         /**
          * Watches for changes in media, invalidating layout as necessary.
          */
         function watchMedia() {
-          $mdUtil.watchResponsiveAttributes(
+          unwatchAttrs = $mdUtil.watchResponsiveAttributes(
               ['cols', 'row-height'], attrs, layoutIfMediaMatch);
           for (var mediaName in $mdConstants.MEDIA) {
             // TODO(shyndman): It would be nice to only layout if we have
             // instances of attributes using this media type
-            $mdMedia.queries[mediaName].addListener(
-                angular.bind(ctrl, ctrl.invalidateLayout));
+            $mdMedia.queries[mediaName].addListener(invalidateLayout);
+          }
+        }
+
+        function unwatchMedia() {
+          unwatchAttrs();
+          for (var mediaName in $mdConstants.MEDIA) {
+            $mdMedia.queries[mediaName].removeListener(invalidateLayout);
           }
         }
 

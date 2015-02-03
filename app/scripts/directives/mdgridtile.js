@@ -22,12 +22,17 @@ angular.module('gridTestApp')
         // FIXME(shyndman): This will only handle appends. We need to consider
         //    inserts as well.
         gridCtrl.addTile(attrs);
-        scope.$on('$destroy', angular.bind(gridCtrl, gridCtrl.removeTile, attrs));
+        scope.$on('$destroy', destroy);
 
         // If our colspan or rowspan changes, trigger a layout
-        $mdUtil.watchResponsiveAttributes(
+        var unwatchAttrs = $mdUtil.watchResponsiveAttributes(
             ['colspan', 'rowspan'], attrs,
             angular.bind(gridCtrl, gridCtrl.invalidateLayout));
+
+        function destroy() {
+          unwatchAttrs();
+          gridCtrl.removeTile(attrs);
+        }
       }
     };
   });
