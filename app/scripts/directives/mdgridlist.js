@@ -166,14 +166,19 @@ angular.module('gridTestApp')
           return parseInt($mdUtil.getResponsiveAttribute(attrs, 'cols'), 10);
         }
 
-        function getRowMode() {
-          var rowHeight = $mdUtil.getResponsiveAttribute(attrs, 'row-height');
-          return rowHeight.indexOf(':') !== -1 ?
-              'ratio' : 'fixed';
-        }
-
         function getGutter() {
           return parseInt($mdUtil.getResponsiveAttribute(attrs, 'gutter'), 10);
+        }
+
+        function getRowMode() {
+          var rowHeight = $mdUtil.getResponsiveAttribute(attrs, 'row-height');
+          if (rowHeight == 'fit') {
+            return 'fit';
+          } else if (rowHeight.indexOf(':') !== -1) {
+            return 'ratio';
+          } else {
+            return 'fixed';
+          }
         }
 
         function getRowHeight() {
