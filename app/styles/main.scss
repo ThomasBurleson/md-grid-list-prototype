@@ -33,7 +33,7 @@ md-grid-list {
 md-grid-tile {
   position: absolute;
 
-  > figure {
+  figure {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -43,42 +43,44 @@ md-grid-tile {
     right: 0;
     bottom: 0;
     left: 0;
+  }
 
-    // Headers & footers
-    > figcaption {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
+  // Headers & footers
+  figcaption {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 48px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.18);
+    overflow: hidden;
 
-      height: 48px;
-      position: absolute;
-      left: 0;
-      right: 0;
-      color: #fff;
-      background: rgba(0, 0, 0, 0.18);
-      overflow: hidden;
+    // Positioning
+    position: absolute;
+    left: 0;
+    right: 0;
 
-      > h3,
-      > h4 {
-        font-weight: 400;
-        margin: 0 0 0 16px;
-      }
-
-      > h3 {
-        font-size: 14px;
-      }
-
-      > h4 {
-        font-size: 12px;
-      }
-    }
-
-    > figcaption.top {
+    &.top {
       top: 0;
     }
 
-    > figcaption.bottom {
+    &.bottom {
       bottom: 0;
+    }
+
+    //
+    > h3,
+    > h4 {
+      font-weight: 400;
+      margin: 0 0 0 16px;
+    }
+
+    > h3 {
+      font-size: 14px;
+    }
+
+    > h4 {
+      font-size: 12px;
     }
   }
 }
@@ -131,9 +133,52 @@ md-grid-tile {
   }
 }
 
-.leaderboard {
+%grey {
   background: #f5f5f5;
+  figcaption {
+    background: #999;
+  }
+}
 
+%teal {
+  background: #b9f6ca;
+  figcaption {
+    color: #616161;
+    background: #1de9b6;
+  }
+}
+
+%yellow {
+  background: #ffff8d;
+  figcaption {
+    color: #616161;
+    background: #ffeb3b;
+  }
+}
+
+%blue {
+  background: #84ffff;;
+  figcaption {
+    background: #03a9f4;
+  }
+}
+
+%pink {
+  background: #ff8a80;
+  figcaption {
+    background: #ff5252;
+  }
+}
+
+%purple {
+  background: #b388ff;
+  figcaption {
+    background: #7e57c2;
+  }
+}
+
+.leaderboard {
+  @extend %grey;
   @media (min-width: $layout-breakpoint-md) {
     svg {
       width: 64%;
@@ -142,14 +187,13 @@ md-grid-tile {
   }
 }
 .food {
-  background: #b9f6ca;
+  @extend %teal;
 }
 .general {
-  background: #ffff8d;
+  @extend %yellow;
 }
 .history {
-  background: #84ffff;
-
+  @extend %blue;
   @media (min-width: $layout-breakpoint-md) {
     svg {
       width: 100%;
@@ -158,24 +202,24 @@ md-grid-tile {
   }
 }
 .geography {
-  background: #ff8a80;
+  @extend %pink;
 }
 .science {
-  background: #b9f6ca;
+  @extend %teal;
 }
 .tv {
-  background: #b388ff;
+  @extend %purple;
 }
 .entertainment {
-  background: #ff8a80;
+  @extend %pink;
 }
 .sports {
-  background: #b388ff;
+  @extend %purple;
 }
 .music {
-  background: #84ffff;
+  @extend %blue;
 }
 .profile {
-  background: #f5f5f5;
+  @extend %grey;
 }
 
