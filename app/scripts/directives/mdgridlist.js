@@ -138,11 +138,17 @@ angular.module('gridTestApp')
 
             case 'ratio':
               var rowPercentHeight = colPercentWidth * (1 / rowHeight);
+              var unitHeight = c.subtract(
+                  c.percent(rowPercentHeight),
+                  c.px(colGutterStep));
               var paddingTop = c.add(
-                  c.percent(spans.row * rowPercentHeight),
+                  c.subtract(
+                    c.percent(spans.row * rowPercentHeight),
+                    c.px(spans.row * colGutterStep)
+                  ),
                   c.px((spans.row - 1) * gutter));
               var marginTop = c.add(
-                  c.percent(position.row * rowPercentHeight),
+                  c.mult(position.row, unitHeight),
                   c.px(position.row * gutter));
 
               style['paddingTop'] = c.calc(paddingTop);
