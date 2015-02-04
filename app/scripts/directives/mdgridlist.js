@@ -242,8 +242,12 @@ angular.module('gridTestApp')
     this.layoutDelegate;
   }
 
-  MdGridListController.prototype.addTile = function(tileAttrs) {
-    this.tiles.push(tileAttrs);
+  MdGridListController.prototype.addTile = function(tileAttrs, idx) {
+    if (!idx) {
+      this.tiles.push(tileAttrs);
+    } else {
+      this.tiles.splice(idx, 0, tileAttrs);
+    }
     this.invalidateLayout();
   };
 

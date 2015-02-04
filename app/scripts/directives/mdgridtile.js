@@ -19,9 +19,9 @@ angular.module('gridTestApp')
         element.attr('role', 'listitem');
 
         // Tile registration/deregistration
-        // FIXME(shyndman): This will only handle appends. We need to consider
-        //    inserts as well.
-        gridCtrl.addTile(attrs);
+        // TODO(shyndman): Accessing ng-repeat scope is kind of ugly...maybe
+        //    we should determine insertion position based on a DOM check?
+        gridCtrl.addTile(attrs, scope.$parent.$index);
         scope.$on('$destroy', destroy);
 
         // If our colspan or rowspan changes, trigger a layout
