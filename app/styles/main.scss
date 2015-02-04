@@ -109,6 +109,10 @@ main {
   flex: 1 0;
   min-height: 420px;
   margin-bottom: 8px;
+
+  md-grid-tile {
+    transition: all 0.3s ease-in-out;
+  }
 }
 
 nav {

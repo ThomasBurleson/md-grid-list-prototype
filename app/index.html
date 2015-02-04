@@ -28,7 +28,9 @@
           {{mainCtrl.tileCount}} tiles rendered in {{mainCtrl.totalTime}}ms
         </span>
         <span class="hint">
-          (layout: {{mainCtrl.layoutTime}}ms, dom: {{mainCtrl.domTime}}ms)
+          layout: {{mainCtrl.layoutTime}}ms,
+          style: {{mainCtrl.styleTime}}ms,
+          reflow: {{mainCtrl.reflowTime}}ms
         </span>
       </p>
       <div ng-switch="mainCtrl.demo"
@@ -120,7 +122,8 @@
                 ng-repeat="tile in mainCtrl.perfTiles"
                 ng-style="{
                   'background': tile.color
-                }">
+                }"
+                ng-click="mainCtrl.removeTile(tile)">
             </md-grid-tile>
           </md-grid-list>
         </section>

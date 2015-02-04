@@ -29,8 +29,17 @@ angular.module('gridTestApp')
 
       this.totalTime = e.performance.totalTime.toFixed(3);
       this.layoutTime = e.performance.layoutTime.toFixed(3);
-      this.domTime = e.performance.domTime.toFixed(3);
+      this.styleTime = e.performance.mapTime.toFixed(3);
+      this.reflowTime = e.performance.reflowTime.toFixed(3);
       this.tileCount = e.performance.tileCount;
+    };
+
+    this.removeTile = function(t) {
+      console.log(t);
+      var idx = this.perfTiles.indexOf(t);
+      if (idx >= 0) {
+        this.perfTiles.splice(idx, 1);
+      }
     };
 
     function randomColor() {

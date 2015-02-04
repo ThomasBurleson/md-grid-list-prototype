@@ -46,6 +46,9 @@ function mdMediaFactory($mdConstants, $window) {
 
 function mdUtilFactory($mdConstants, $mdMedia, $window) {
   var normalizeCache = {};
+  var now = $window.performance.now ?
+      angular.bind($window.performance, $window.performance.now) :
+      angular.bind(Date, Date.now);
 
   return {
     time: time,
@@ -54,9 +57,9 @@ function mdUtilFactory($mdConstants, $mdMedia, $window) {
   };
 
   function time(cb) {
-    var start = $window.performance.now();
+    var start = now();
     cb();
-    return $window.performance.now() - start;
+    return now() - start;
   }
 
   function getResponsiveAttribute(attrs, attrName) {
@@ -102,6 +105,7 @@ function mdUtilFactory($mdConstants, $mdMedia, $window) {
     };
   }
 
+  // Improves performance dramatically
   function getNormalizedName(attrs, attrName) {
     return normalizeCache[attrName] ||
         (normalizeCache[attrName] = attrs.$normalize(attrName));

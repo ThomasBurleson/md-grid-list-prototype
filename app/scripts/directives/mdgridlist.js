@@ -67,33 +67,23 @@ angular.module('gridTestApp')
           var rowMode = getRowMode();
           var rowHeight = getRowHeight();
           var gutter = getGutter();
-          var layoutTime;
-          var totalTime =
-              $mdUtil.time(function() {
-                var layoutInfo;
-                layoutTime = $mdUtil.time(function() {
-                  layoutInfo = $$mdGridLayout({
-                    tileSpans: getTileSpans(),
-                    colCount: colCount
-                  });
-                });
-                layoutInfo.positioning.forEach(function(ps, i) {
-                  angular.element(tiles[i]).css(
-                    getStyles(ps.position, ps.spans,
-                        colCount, layoutInfo.rowCount,
-                        gutter, rowMode, rowHeight));
-                });
-              });
+          var performance =
+              $$mdGridLayout(colCount, getTileSpans(), getTileElements())
+                  .map(function(ps, rowCount, i) {
+                    return {
+                      element: angular.element(tiles[i]),
+                      styles: getStyles(ps.position, ps.spans,
+                          colCount, rowCount,
+                          gutter, rowMode, rowHeight)
+                    }
+                  })
+                  .reflow()
+                  .performance();
 
           // Report layout
           scope.onLayout({
             $event: {
-              performance: {
-                tileCount: ctrl.tiles.length,
-                totalTime: totalTime,
-                layoutTime: layoutTime,
-                domTime: totalTime - layoutTime
-              }
+              performance: performance
             }
           });
         };
@@ -102,6 +92,7 @@ angular.module('gridTestApp')
         var POSITION = $interpolate("calc(({{ unit }}) * {{ offset }} + {{ gutter }}px)");
         var DIMENSION = $interpolate("calc(({{ unit }}) * {{ span }} + {{ gutter }}px)");
 
+        // TODO(shyndman): Replace args with a ctx object.
         function getStyles(position, spans, colCount, rowCount, gutter, rowMode, rowHeight) {
           var hShare = (1 / colCount) * 100;
           var hGutterShare = colCount == 1 ? 0 : (gutter * (colCount - 1) / colCount);
@@ -173,17 +164,6 @@ angular.module('gridTestApp')
           return parseInt($mdUtil.getResponsiveAttribute(attrs, 'gutter'), 10);
         }
 
-        function getRowMode() {
-          var rowHeight = $mdUtil.getResponsiveAttribute(attrs, 'row-height');
-          if (rowHeight == 'fit') {
-            return 'fit';
-          } else if (rowHeight.indexOf(':') !== -1) {
-            return 'ratio';
-          } else {
-            return 'fixed';
-          }
-        }
-
         function getRowHeight() {
           var rowHeight = $mdUtil.getResponsiveAttribute(attrs, 'row-height');
           switch (getRowMode()) {
@@ -196,11 +176,172 @@ angular.module('gridTestApp')
               return 0; // N/A
           }
         }
+
+        function getRowMode() {
+          var rowHeight = $mdUtil.getResponsiveAttribute(attrs, 'row-height');
+          if (rowHeight == 'fit') {
+            return 'fit';
+          } else if (rowHeight.indexOf(':') !== -1) {
+            return 'ratio';
+          } else {
+            return 'fixed';
+          }
+        }
       }
     };
   })
-  .factory('$$mdGridLayout', function() {
-    return layoutGrid;
+  .factory('$$mdGridLayout', function($mdUtil) {
+    return function(colCount, tileSpans) {
+      var self, layoutInfo, tiles, layoutTime, mapTime, reflowTime, layoutInfo;
+      layoutTime = $mdUtil.time(function() {
+        layoutInfo = calculateGridFor(colCount, tileSpans);
+      });
+
+      return self = {
+        /**
+         * An array of objects describing each tile's position in the grid.
+         */
+        layoutInfo: function() {
+          return layoutInfo || [];
+        },
+
+        /**
+         * Maps grid positioning to an element and a set of styles.
+         */
+        map: function(updateFn) {
+          mapTime = $mdUtil.time(function() {
+            tiles = layoutInfo.positioning.map(function(ps, i) {
+              return updateFn(ps, layoutInfo.rowCount, i);
+            });
+          });
+          return self;
+        },
+
+        /**
+         * Default animator simply sets the element.css( <styles> ).
+         * Use the $$mdGridLayoutProvider to decorate the animator callback if
+         * alternate animation scenarios are desired.
+         */
+        reflow: function(customAnimatorFn) {
+          reflowTime = $mdUtil.time(function() {
+            var animator = customAnimatorFn || defaultAnimator;
+            tiles.forEach(function(it) {
+              animator(it.element, it.styles);
+            });
+          });
+          return self;
+        },
+
+        /**
+         * Timing for the most recent run of gridLayout.
+         */
+        performance: function() {
+          return {
+            tileCount: tileSpans.length,
+            layoutTime: layoutTime,
+            mapTime: mapTime,
+            reflowTime: reflowTime,
+            totalTime: layoutTime + mapTime + reflowTime
+          };
+        }
+      };
+    };
+
+    function defaultAnimator(element, styles) {
+      element.css(styles);
+    };
+
+    /**
+     * TODO(shyndman) Document this like craaaazy.
+     */
+    function calculateGridFor(colCount, tileSpans) {
+      var curCol = 0;
+      var curRow = 0;
+      var row = newRowArray();
+
+      var positioning = tileSpans.map(function(spans) {
+        return {
+          spans: spans,
+          position: reserveSpace(spans)
+        };
+      });
+      return {
+        rowCount: curRow + Math.max.apply(Math, row),
+        positioning: positioning
+      }
+
+      function reserveSpace(spans) {
+        var start = 0,
+            end = 0;
+
+        // TODO(shyndman): This loop isn't strictly necessary if you can
+        // determine the minimum number of rows before a space opens up. To do
+        // this, recognize that you've iterated across an entire row looking for
+        // space, and if so fast-forward by the minimum rowSpan count. Repeat
+        // until the required space opens up.
+        while (end - start < spans.col) {
+          if (curCol >= colCount) {
+            nextRow();
+            continue;
+          }
+
+          start = row.indexOf(0, curCol);
+          if (start === -1) {
+            nextRow();
+            continue;
+          }
+
+          end = findEnd(start + 1);
+          if (end === -1) {
+            nextRow();
+            continue;
+          }
+
+          curCol = end + 1;
+        }
+
+        adjustRow(start, spans.col, spans.row);
+        curCol = start + spans.col;
+
+        return {
+          col: start,
+          row: curRow
+        };
+      }
+
+      function nextRow() {
+        curCol = 0;
+        curRow++;
+        adjustRow(0, colCount, -1); // Decrement row spans by one
+      }
+
+      function adjustRow(from, cols, by) {
+        for (var i = from; i < from + cols; i++) {
+          row[i] = Math.max(row[i] + by, 0);
+        }
+      }
+
+      function findEnd(start) {
+        var i;
+        for (i = start; i < row.length; i++) {
+          if (row[i] !== 0) {
+            return i;
+          }
+        }
+
+        if (i === row.length) {
+          return i;
+        }
+      }
+
+      function newRowArray() {
+        var tracker = [];
+        for (var i = 0; i < colCount; i++) {
+          tracker.push(0);
+        }
+        return tracker;
+      }
+    }
   });
 
 
@@ -246,97 +387,4 @@ angular.module('gridTestApp')
       this.invalidated = false;
     }
   };
-
-
-  // Grid layout
-  function layoutGrid(options) {
-    var tileSpans = options.tileSpans;
-    var colCount = options.colCount;
-    var curCol = 0;
-    var curRow = 0;
-    var row = newRowArray();
-
-    var positioning = tileSpans.map(function(spans) {
-      return {
-        spans: spans,
-        position: reserveSpace(spans)
-      };
-    });
-    return {
-      rowCount: curRow + Math.max.apply(Math, row),
-      positioning: positioning
-    }
-
-    function reserveSpace(spans) {
-      var start = 0,
-          end = 0;
-
-      // TODO(shyndman): This loop isn't strictly necessary if you can determine
-      // the minimum number of rows before a space opens up. To do this,
-      // recognize that you've iterated across an entire row looking for space,
-      // and if so fast-forward by the minimum rowSpan count. Repeat until the
-      // required space opens up.
-      while (end - start < spans.col) {
-        if (curCol >= colCount) {
-          nextRow();
-          continue;
-        }
-
-        start = row.indexOf(0, curCol);
-        if (start === -1) {
-          nextRow();
-          continue;
-        }
-
-        end = findEnd(start + 1);
-        if (end === -1) {
-          nextRow();
-          continue;
-        }
-
-        curCol = end + 1;
-      }
-
-      adjustRow(start, spans.col, spans.row);
-      curCol = start + spans.col;
-
-      return {
-        col: start,
-        row: curRow
-      };
-    }
-
-    function nextRow() {
-      curCol = 0;
-      curRow++;
-      adjustRow(0, colCount, -1); // Decrement row spans by one
-    }
-
-    function adjustRow(from, cols, by) {
-      for (var i = from; i < from + cols; i++) {
-        row[i] = Math.max(row[i] + by, 0);
-      }
-    }
-
-    function findEnd(start) {
-      var i;
-      for (i = start; i < row.length; i++) {
-        if (row[i] !== 0) {
-          return i;
-        }
-      }
-
-      if (i === row.length) {
-        return i;
-      }
-    }
-
-    function newRowArray() {
-      var tracker = [];
-      for (var i = 0; i < colCount; i++) {
-        tracker.push(0);
-      }
-      return tracker;
-    }
-  }
 })();
