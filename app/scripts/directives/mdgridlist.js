@@ -20,26 +20,25 @@ angular.module('gridTestApp')
       },
       link: function postLink(scope, element, attrs, ctrl) {
         element.attr('role', 'list'); // Apply semantics
-        var invalidateLayout = angular.bind(ctrl, ctrl.invalidateLayout);
-        var unwatchAttrs;
 
-        watchMedia();
-        scope.$on('$destroy', unwatchMedia);
+        var invalidateLayout = angular.bind(ctrl, ctrl.invalidateLayout);
+        var unwatchAttrs = watchMedia();
+        scope.$on('$destroy', angular.bind(this, unwatchMedia, unwatchAttrs));
 
         /**
          * Watches for changes in media, invalidating layout as necessary.
          */
         function watchMedia() {
-          unwatchAttrs = $mdUtil.watchResponsiveAttributes(
-              ['cols', 'row-height'], attrs, layoutIfMediaMatch);
           for (var mediaName in $mdConstants.MEDIA) {
             // TODO(shyndman): It would be nice to only layout if we have
             // instances of attributes using this media type
             $mdMedia.queries[mediaName].addListener(invalidateLayout);
           }
+          return $mdUtil.watchResponsiveAttributes(
+              ['cols', 'row-height'], attrs, layoutIfMediaMatch);;
         }
 
-        function unwatchMedia() {
+        function unwatchMedia(unwatchAttrs) {
           unwatchAttrs();
           for (var mediaName in $mdConstants.MEDIA) {
             $mdMedia.queries[mediaName].removeListener(invalidateLayout);
@@ -222,7 +221,7 @@ angular.module('gridTestApp')
               var whRatio = rowHeight.split(':');
               return parseFloat(whRatio[0]) / parseFloat(whRatio[1]);
             case 'fit':
-              return 0; // not used
+              return 0; // N/A
           }
         }
       }
@@ -303,8 +302,8 @@ angular.module('gridTestApp')
       // TODO(shyndman): This loop isn't strictly necessary if you can determine
       // the minimum number of rows before a space opens up. To do this,
       // recognize that you've iterated across an entire row looking for space,
-      // and if so fast-forward by the minimum rowSpan count. Repeat until space
-      // opens up.
+      // and if so fast-forward by the minimum rowSpan count. Repeat until the
+      // required space opens up.
       while (end - start < spans.col) {
         if (curCol >= colCount) {
           nextRow();

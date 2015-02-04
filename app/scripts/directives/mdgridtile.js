@@ -11,7 +11,6 @@ angular.module('gridTestApp')
     return {
       restrict: 'E',
       require: '^mdGridList',
-      scope: {},
       template: '<figure ng-transclude></figure>',
       transclude: true,
       link: function postLink(scope, element, attrs, gridCtrl) {
@@ -19,20 +18,18 @@ angular.module('gridTestApp')
         element.attr('role', 'listitem');
 
         // Tile registration/deregistration
-        // TODO(shyndman): Accessing ng-repeat scope is kind of ugly...maybe
-        //    we should determine insertion position based on a DOM check?
+        // TODO(shyndman): Kind of gross to access parent scope like this.
+        //    Consider other options.
         gridCtrl.addTile(attrs, scope.$parent.$index);
-        scope.$on('$destroy', destroy);
+        scope.$on('$destroy', function() {
+          unwatchAttrs();
+          gridCtrl.removeTile(attrs);
+        });
 
         // If our colspan or rowspan changes, trigger a layout
         var unwatchAttrs = $mdUtil.watchResponsiveAttributes(
             ['colspan', 'rowspan'], attrs,
             angular.bind(gridCtrl, gridCtrl.invalidateLayout));
-
-        function destroy() {
-          unwatchAttrs();
-          gridCtrl.removeTile(attrs);
-        }
       }
     };
   });
