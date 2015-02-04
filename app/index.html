@@ -24,7 +24,9 @@
         </ul>
       </nav>
       <p>
-        {{mainCtrl.tileCount}} tiles rendered in {{mainCtrl.totalTime}}ms
+        <span class="perf">
+          {{mainCtrl.tileCount}} tiles rendered in {{mainCtrl.totalTime}}ms
+        </span>
         <span class="hint">
           (layout: {{mainCtrl.layoutTime}}ms, dom: {{mainCtrl.domTime}}ms)
         </span>
