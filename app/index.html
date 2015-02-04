@@ -29,11 +29,12 @@
           (layout: {{mainCtrl.layoutTime}}ms, dom: {{mainCtrl.domTime}}ms)
         </span>
       </p>
-      <div ng-switch="mainCtrl.demo">
-        <section ng-switch-when="topeka">
+      <div ng-switch="mainCtrl.demo"
+          class="demos">
+        <section class="demo topeka" ng-switch-when="topeka">
           <md-grid-list
               gt-md-cols="6" cols="2"
-              gt-md-row-height="16:15" row-height="225"
+              gt-md-row-height="fit" row-height="225"
               gt-md-gutter="8" gutter="4"
               on-layout="mainCtrl.onLayout($event)">
             <md-grid-tile class="leaderboard"
@@ -107,7 +108,7 @@
             </md-grid-tile>
           </md-grid-list>
         </section>
-        <section ng-switch-when="perf">
+        <section class="demo perf" ng-switch-when="perf">
           <md-grid-list
               gt-md-cols="12" cols="3"
               gt-md-row-height="1:1" row-height="225"

@@ -80,9 +80,11 @@ angular.module('gridTestApp')
                     colCount: colCount
                   });
                 });
-                layoutInfo.forEach(function(ps, i) {
+                layoutInfo.positioning.forEach(function(ps, i) {
                   angular.element(tiles[i]).css(
-                    getStyles(ps.position, ps.spans, colCount, gutter, rowMode, rowHeight));
+                    getStyles(ps.position, ps.spans,
+                        colCount, layoutInfo.rowCount,
+                        gutter, rowMode, rowHeight));
                 });
               });
 
@@ -99,28 +101,28 @@ angular.module('gridTestApp')
           });
         };
 
-        function getStyles(position, spans, colCount, gutter, rowMode, rowHeight) {
+        function getStyles(position, spans, colCount, rowCount, gutter, rowMode, rowHeight) {
           var colPercentWidth = (1 / colCount) * 100;
-          var gutterStep = colCount == 1 ? 0 : (gutter * (colCount - 1) / colCount);
+          var colGutterStep = colCount == 1 ? 0 : (gutter * (colCount - 1) / colCount);
 
           // Ugh, makes you wish for operator overloading
           var unitWidth = c.subtract(
               c.percent(colPercentWidth),
-              c.px(gutterStep));
+              c.px(colGutterStep));
           var left = c.add(
               c.mult(position.col, unitWidth),
               c.px(position.col * gutter));
           var width = c.add(
               c.subtract(
                 c.percent(spans.col * colPercentWidth),
-                c.px(spans.col * gutterStep)
+                c.px(spans.col * colGutterStep)
               ),
               c.px((spans.col - 1) * gutter));
 
           var style = {
             // shared styles between row modes
-            width: 'calc(' + width + ')',
-            left: 'calc(' + left + ')',
+            width: c.calc(width),
+            left: c.calc(left),
             // resets
             paddingTop: '',
             marginTop: '',
@@ -128,20 +130,44 @@ angular.module('gridTestApp')
             height: ''
           };
 
-          if (rowMode == 'fixed') {
-            style['top'] = (position.row * rowHeight) + (position.row * gutter) + 'px';
-            style['height'] = spans.row * rowHeight + 'px';
-          } else { // rowMode == 'ratio'
-            var rowPercentHeight = colPercentWidth * (1 / rowHeight);
-            var paddingTop = c.add(
-                c.percent(spans.row * rowPercentHeight),
-                c.px((spans.row - 1) * gutter));
-            var marginTop = c.add(
-                c.percent(position.row * rowPercentHeight),
-                c.px(position.row * gutter));
+          switch (rowMode) {
+            case 'fixed':
+              style['top'] = c.px((position.row * rowHeight) + (position.row * gutter));
+              style['height'] = c.px(spans.row * rowHeight);
+              break;
 
-            style['paddingTop'] = 'calc(' + paddingTop + ')';
-            style['marginTop'] = 'calc(' + marginTop + ')';
+            case 'ratio':
+              var rowPercentHeight = colPercentWidth * (1 / rowHeight);
+              var paddingTop = c.add(
+                  c.percent(spans.row * rowPercentHeight),
+                  c.px((spans.row - 1) * gutter));
+              var marginTop = c.add(
+                  c.percent(position.row * rowPercentHeight),
+                  c.px(position.row * gutter));
+
+              style['paddingTop'] = c.calc(paddingTop);
+              style['marginTop'] = c.calc(marginTop);
+              break;
+
+            case 'fit':
+              var rowGutterStep = rowCount == 1 ? 0 : (gutter * (rowCount - 1) / rowCount);
+              var rowPercentWidth = (1 / rowCount) * 100;
+              var unitHeight = c.subtract(
+                  c.percent(rowPercentWidth),
+                  c.px(rowGutterStep));
+              var top = c.add(
+                  c.mult(position.row, unitHeight),
+                  c.px(position.row * gutter));
+              var height = c.add(
+                  c.subtract(
+                    c.percent(spans.row * rowPercentWidth),
+                    c.px(spans.row * rowGutterStep)
+                  ),
+                  c.px((spans.row - 1) * gutter));
+
+              style['top'] = c.calc(top);
+              style['height'] = c.calc(height);
+              break;
           }
 
           return style;
@@ -183,11 +209,14 @@ angular.module('gridTestApp')
 
         function getRowHeight() {
           var rowHeight = $mdUtil.getResponsiveAttribute(attrs, 'row-height');
-          if (rowHeight.indexOf(':') === -1) {
-            return parseInt(rowHeight, 10);
-          } else {
-            var whRatio = rowHeight.split(':');
-            return parseFloat(whRatio[0]) / parseFloat(whRatio[1]);
+          switch (getRowMode()) {
+            case 'fixed':
+              return parseInt(rowHeight, 10);
+            case 'ratio':
+              var whRatio = rowHeight.split(':');
+              return parseFloat(whRatio[0]) / parseFloat(whRatio[1]);
+            case 'fit':
+              return 0; // not used
           }
         }
       }
@@ -246,15 +275,16 @@ angular.module('gridTestApp')
     var curRow = 0;
     var row = newRowArray();
 
-    // console.time('grid layout');
     var positioning = tileSpans.map(function(spans) {
       return {
         spans: spans,
         position: reserveSpace(spans)
       };
     });
-    // console.timeEnd('grid layout');
-    return positioning;
+    return {
+      rowCount: curRow + Math.max.apply(Math, row),
+      positioning: positioning
+    }
 
     function reserveSpace(spans) {
       var start = 0,

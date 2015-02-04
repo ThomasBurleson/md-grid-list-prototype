@@ -117,7 +117,10 @@ function mdCalcFactory() {
     add: angular.bind(void 0, binary, '+'),
     subtract: angular.bind(void 0, binary, '-'),
     mult: angular.bind(void 0, binary, '*'),
-    div: angular.bind(void 0, binary, '/')
+    div: angular.bind(void 0, binary, '/'),
+    calc: function(val) {
+      return 'calc(' + val + ')';
+    }
   };
 
   function unit(unit, value) {
