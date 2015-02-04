@@ -9,9 +9,7 @@
  */
 angular.module('gridTestApp')
   .directive('mdGridList', function(
-      $$mdGridLayout, $mdCalc, $mdConstants, $mdMedia, $mdUtil) {
-    var c = $mdCalc;
-
+      $$mdGridLayout, $interpolate, $mdConstants, $mdMedia, $mdUtil) {
     return {
       restrict: 'E',
       controller: MdGridListController,
@@ -100,28 +98,20 @@ angular.module('gridTestApp')
           });
         };
 
-        function getStyles(position, spans, colCount, rowCount, gutter, rowMode, rowHeight) {
-          var colPercentWidth = (1 / colCount) * 100;
-          var colGutterStep = colCount == 1 ? 0 : (gutter * (colCount - 1) / colCount);
+        var UNIT = $interpolate("{{ share }}% - {{ gutterShare }}px");
+        var POSITION = $interpolate("calc(({{ unit }}) * {{ offset }} + {{ gutter }}px)");
+        var DIMENSION = $interpolate("calc(({{ unit }}) * {{ span }} + {{ gutter }}px)");
 
-          // Ugh, makes you wish for operator overloading
-          var unitWidth = c.subtract(
-              c.percent(colPercentWidth),
-              c.px(colGutterStep));
-          var left = c.add(
-              c.mult(position.col, unitWidth),
-              c.px(position.col * gutter));
-          var width = c.add(
-              c.subtract(
-                c.percent(spans.col * colPercentWidth),
-                c.px(spans.col * colGutterStep)
-              ),
-              c.px((spans.col - 1) * gutter));
+        function getStyles(position, spans, colCount, rowCount, gutter, rowMode, rowHeight) {
+          var hShare = (1 / colCount) * 100;
+          var hGutterShare = colCount == 1 ? 0 : (gutter * (colCount - 1) / colCount);
+          var hUnit = UNIT({ share: hShare, gutterShare: hGutterShare });
+          var left = POSITION({ unit: hUnit, offset: position.col, gutter: position.col * gutter });
+          var width = DIMENSION({ unit: hUnit, span: spans.col, gutter: (spans.col - 1) * gutter });
 
           var style = {
-            // shared styles between row modes
-            width: c.calc(width),
-            left: c.calc(left),
+            width: width,
+            left: left,
             // resets
             paddingTop: '',
             marginTop: '',
@@ -131,47 +121,29 @@ angular.module('gridTestApp')
 
           switch (rowMode) {
             case 'fixed':
-              style['top'] = c.px((position.row * rowHeight) + (position.row * gutter));
-              style['height'] = c.px(spans.row * rowHeight);
+              style['top'] = (position.row * rowHeight) + (position.row * gutter) + 'px';
+              style['height'] = spans.row * rowHeight + 'px';
               break;
 
             case 'ratio':
-              var rowPercentHeight = colPercentWidth * (1 / rowHeight);
-              var unitHeight = c.subtract(
-                  c.percent(rowPercentHeight),
-                  c.px(colGutterStep));
-              var paddingTop = c.add(
-                  c.subtract(
-                    c.percent(spans.row * rowPercentHeight),
-                    c.px(spans.row * colGutterStep)
-                  ),
-                  c.px((spans.row - 1) * gutter));
-              var marginTop = c.add(
-                  c.mult(position.row, unitHeight),
-                  c.px(position.row * gutter));
+              var vShare = hShare * (1 / rowHeight);
+              var vUnit = UNIT({ share: vShare, gutterShare: hGutterShare });
+              var marginTop = POSITION({ unit: vUnit, offset: position.row, gutter: position.row * gutter });
+              var paddingTop = DIMENSION({ unit: vUnit, span: spans.row, gutter: (spans.row - 1) * gutter});
 
-              style['paddingTop'] = c.calc(paddingTop);
-              style['marginTop'] = c.calc(marginTop);
+              style['paddingTop'] = paddingTop;
+              style['marginTop'] = marginTop;
               break;
 
             case 'fit':
-              var rowGutterStep = rowCount == 1 ? 0 : (gutter * (rowCount - 1) / rowCount);
-              var rowPercentWidth = (1 / rowCount) * 100;
-              var unitHeight = c.subtract(
-                  c.percent(rowPercentWidth),
-                  c.px(rowGutterStep));
-              var top = c.add(
-                  c.mult(position.row, unitHeight),
-                  c.px(position.row * gutter));
-              var height = c.add(
-                  c.subtract(
-                    c.percent(spans.row * rowPercentWidth),
-                    c.px(spans.row * rowGutterStep)
-                  ),
-                  c.px((spans.row - 1) * gutter));
+              var vGutterShare = rowCount == 1 ? 0 : (gutter * (rowCount - 1) / rowCount);
+              var vShare = (1 / rowCount) * 100;
+              var vUnit = UNIT({ share: vShare, gutterShare: vGutterShare });
+              var top = POSITION({ unit: vUnit, offset: position.row, gutter: position.row * gutter });
+              var height = DIMENSION({ unit: vUnit, span: spans.row, gutter: (spans.row - 1) * gutter });
 
-              style['top'] = c.calc(top);
-              style['height'] = c.calc(height);
+              style['top'] = top;
+              style['height'] = height;
               break;
           }
 

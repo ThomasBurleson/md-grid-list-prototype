@@ -4,8 +4,7 @@
 angular.module('gridTestApp')
     .factory('$mdConstants', mdConstantFactory)
     .factory('$mdMedia', mdMediaFactory)
-    .factory('$mdUtil', mdUtilFactory)
-    .factory('$mdCalc', mdCalcFactory);
+    .factory('$mdUtil', mdUtilFactory);
 
 
 function mdConstantFactory() {
@@ -106,29 +105,6 @@ function mdUtilFactory($mdConstants, $mdMedia, $window) {
   function getNormalizedName(attrs, attrName) {
     return normalizeCache[attrName] ||
         (normalizeCache[attrName] = attrs.$normalize(attrName));
-  }
-}
-
-
-function mdCalcFactory() {
-  return {
-    px: angular.bind(void 0, unit, 'px'),
-    percent: angular.bind(void 0, unit, '%'),
-    add: angular.bind(void 0, binary, '+'),
-    subtract: angular.bind(void 0, binary, '-'),
-    mult: angular.bind(void 0, binary, '*'),
-    div: angular.bind(void 0, binary, '/'),
-    calc: function(val) {
-      return 'calc(' + val + ')';
-    }
-  };
-
-  function unit(unit, value) {
-    return value + unit;
-  }
-
-  function binary(operator, a, b) {
-    return '(' + a + ' ' + operator + ' ' + b + ')';
   }
 }
 
