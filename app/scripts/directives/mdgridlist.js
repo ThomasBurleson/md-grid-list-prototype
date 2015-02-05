@@ -265,11 +265,12 @@ angular.module('gridTestApp')
      *    empty tile position. Space for a tile is reserved by finding a
      *    sequence of 0s with length <= than the tile's colspan. When such a
      *    space has been found, the occupied tile positions are incremented by
-     *    the tile's rowspan value, as the positions have become unavailable for
-     *    that many rows.
+     *    the tile's rowspan value, as those positions have become unavailable
+     *    for that many rows.
      *
      *    If the end of a row has been reached without finding space for the
-     *    tile, spaceTracker's elements are each decremented by 1.
+     *    tile, spaceTracker's elements are each decremented by 1 to a minimum
+     *    of 0. Repeat until space is found.
      */
     function calculateGridFor(colCount, tileSpans) {
       var curCol = 0;
@@ -308,14 +309,7 @@ angular.module('gridTestApp')
           }
 
           start = spaceTracker.indexOf(0, curCol);
-          if (start === -1) {
-            start = end = 0;
-            nextRow();
-            continue;
-          }
-
-          end = findEnd(start + 1);
-          if (end === -1) {
+          if (start === -1 || (end = findEnd(start + 1)) === -1) {
             start = end = 0;
             nextRow();
             continue;

@@ -46,7 +46,7 @@ function mdMediaFactory($mdConstants, $window) {
 
 function mdUtilFactory($mdConstants, $mdMedia, $window) {
   var normalizeCache = {};
-  var now = $window.performance.now ?
+  var now = $window.performance && $window.performance.now ?
       angular.bind($window.performance, $window.performance.now) :
       angular.bind(Date, Date.now);
 
