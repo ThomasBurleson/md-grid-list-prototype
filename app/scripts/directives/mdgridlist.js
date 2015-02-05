@@ -211,7 +211,8 @@ angular.module('gridTestApp')
         },
 
         /**
-         * Maps grid positioning to an element and a set of styles.
+         * Maps grid positioning to an element and a set of styles using the
+         * provided updateFn.
          */
         map: function(updateFn) {
           mapTime = $mdUtil.time(function() {
