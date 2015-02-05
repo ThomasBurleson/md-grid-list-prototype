@@ -285,7 +285,7 @@ angular.module('gridTestApp')
           };
         }),
         rowCount: curRow + Math.max.apply(Math, spaceTracker)
-      }
+      };
 
       function reserveSpace(spans, i) {
         if (spans.col > colCount) {
