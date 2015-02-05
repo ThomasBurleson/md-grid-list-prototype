@@ -100,7 +100,7 @@ angular.module('gridTestApp')
         // TODO(shyndman): Replace args with a ctx object.
         function getStyles(position, spans, colCount, rowCount, gutter, rowMode, rowHeight) {
           var hShare = (1 / colCount) * 100;
-          var hGutterShare = colCount == 1 ? 0 : (gutter * (colCount - 1) / colCount);
+          var hGutterShare = colCount === 1 ? 0 : (gutter * (colCount - 1) / colCount);
           var hUnit = UNIT({ share: hShare, gutterShare: hGutterShare });
           var left = POSITION({ unit: hUnit, offset: position.col, gutter: position.col * gutter });
           var width = DIMENSION({ unit: hUnit, span: spans.col, gutter: (spans.col - 1) * gutter });
@@ -132,7 +132,7 @@ angular.module('gridTestApp')
               break;
 
             case 'fit':
-              var vGutterShare = rowCount == 1 ? 0 : (gutter * (rowCount - 1) / rowCount);
+              var vGutterShare = rowCount === 1 ? 0 : (gutter * (rowCount - 1) / rowCount);
               var vShare = (1 / rowCount) * 100;
               var vUnit = UNIT({ share: vShare, gutterShare: vGutterShare });
               var top = POSITION({ unit: vUnit, offset: position.row, gutter: position.row * gutter });
@@ -262,15 +262,15 @@ angular.module('gridTestApp')
      * The algorithm works as follows:
      *    An Array<Number> with length columnCount (spaceTracker) keeps track of
      *    available tiling positions, where elements of value 0 represents an
-     *    empty tile position. Space for a tile is reserved by finding a
-     *    sequence of 0s with length <= than the tile's colspan. When such a
-     *    space has been found, the occupied tile positions are incremented by
-     *    the tile's rowspan value, as those positions have become unavailable
-     *    for that many rows.
+     *    empty position. Space for a tile is reserved by finding a sequence of
+     *    0s with length <= than the tile's colspan. When such a space has been
+     *    found, the occupied tile positions are incremented by the tile's
+     *    rowspan value, as those positions have become unavailable for that
+     *    many rows.
      *
      *    If the end of a row has been reached without finding space for the
      *    tile, spaceTracker's elements are each decremented by 1 to a minimum
-     *    of 0. Repeat until space is found.
+     *    of 0. Continue moving through rows until space is found.
      */
     function calculateGridFor(colCount, tileSpans) {
       var curCol = 0;
