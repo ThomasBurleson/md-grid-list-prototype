@@ -91,17 +91,22 @@ angular.module('gridTestApp')
           });
         };
 
-        var UNIT = $interpolate("{{ share }}% - {{ gutterShare }}px");
-        var POSITION = $interpolate("calc(({{ unit }}) * {{ offset }} + {{ gutter }}px)");
-        var DIMENSION = $interpolate("calc(({{ unit }}) * {{ span }} + {{ gutter }}px)");
+        var UNIT = $interpolate(
+            "{{ share }}% - {{ gutterShare }}px");
+        var POSITION = $interpolate(
+            "calc(({{ unit }}) * {{ offset }} + {{ gutter }}px)");
+        var DIMENSION = $interpolate(
+            "calc(({{ unit }}) * {{ span }} + {{ gutter }}px)");
 
         // TODO(shyndman): Replace args with a ctx object.
         function getStyles(position, spans, colCount, rowCount, gutter, rowMode, rowHeight) {
           var hShare = (1 / colCount) * 100;
-          var hGutterShare = colCount === 1 ? 0 : (gutter * (colCount - 1) / colCount);
+          var hGutterShare = colCount === 1 ? 0 : gutter * (colCount - 1) / colCount;
           var hUnit = UNIT({ share: hShare, gutterShare: hGutterShare });
-          var left = POSITION({ unit: hUnit, offset: position.col, gutter: position.col * gutter });
-          var width = DIMENSION({ unit: hUnit, span: spans.col, gutter: (spans.col - 1) * gutter });
+          var left = POSITION({ unit: hUnit, offset: position.col,
+              gutter: position.col * gutter });
+          var width = DIMENSION({ unit: hUnit, span: spans.col,
+              gutter: (spans.col - 1) * gutter });
 
           var style = {
             width: width,
@@ -120,10 +125,13 @@ angular.module('gridTestApp')
               break;
 
             case 'ratio':
-              var vShare = hShare * (1 / rowHeight); // rowHeight is a ratio of width:height
+              // rowHeight is width / height
+              var vShare = hShare * (1 / rowHeight);
               var vUnit = UNIT({ share: vShare, gutterShare: hGutterShare });
-              var marginTop = POSITION({ unit: vUnit, offset: position.row, gutter: position.row * gutter });
-              var paddingTop = DIMENSION({ unit: vUnit, span: spans.row, gutter: (spans.row - 1) * gutter});
+              var marginTop = POSITION({ unit: vUnit, offset: position.row,
+                  gutter: position.row * gutter });
+              var paddingTop = DIMENSION({ unit: vUnit, span: spans.row,
+                  gutter: (spans.row - 1) * gutter});
 
               style['paddingTop'] = paddingTop;
               style['marginTop'] = marginTop;
@@ -133,8 +141,10 @@ angular.module('gridTestApp')
               var vGutterShare = rowCount === 1 ? 0 : (gutter * (rowCount - 1) / rowCount);
               var vShare = (1 / rowCount) * 100;
               var vUnit = UNIT({ share: vShare, gutterShare: vGutterShare });
-              var top = POSITION({ unit: vUnit, offset: position.row, gutter: position.row * gutter });
-              var height = DIMENSION({ unit: vUnit, span: spans.row, gutter: (spans.row - 1) * gutter });
+              var top = POSITION({ unit: vUnit, offset: position.row,
+                  gutter: position.row * gutter });
+              var height = DIMENSION({ unit: vUnit, span: spans.row,
+                  gutter: (spans.row - 1) * gutter });
 
               style['top'] = top;
               style['height'] = height;
@@ -215,7 +225,7 @@ angular.module('gridTestApp')
         map: function(updateFn) {
           mapTime = $mdUtil.time(function() {
             tiles = layoutInfo.positioning.map(function(ps, i) {
-              return updateFn(ps, layoutInfo.rowCount, i);
+              return updateFn(ps, self.layoutInfo().rowCount, i);
             });
           });
           return self;
