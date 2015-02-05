@@ -294,8 +294,8 @@ angular.module('gridTestApp')
               '(' + colCount + ')';
         }
 
-        var start = 0,
-            end = 0;
+        var start = 0
+        var end = 0;
 
         // TODO(shyndman): This loop isn't strictly necessary if you can
         // determine the minimum number of rows before a space opens up. To do
