@@ -110,7 +110,7 @@ main {
   min-height: 420px;
   margin-bottom: 8px;
 
-  md-grid-tile {
+  md-grid-tile, svg {
     transition: all 0.3s ease-in-out;
   }
 }

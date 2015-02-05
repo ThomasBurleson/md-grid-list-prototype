@@ -233,7 +233,7 @@ angular.module('gridTestApp')
         },
 
         /**
-         * Timing for the most recent run of gridLayout.
+         * Timing for the most recent layout run.
          */
         performance: function() {
           return {
@@ -252,25 +252,42 @@ angular.module('gridTestApp')
     };
 
     /**
-     * TODO(shyndman) Document this like craaaazy.
+     * Calculates the positions of tiles.
+     *
+     * The algorithm works as follows:
+     *    An Array<Number> with length columnCount (spaceTracker) keeps track of
+     *    available tiling positions, where elements of value 0 represents an
+     *    empty tile position. Space for a tile is reserved by finding a
+     *    sequence of 0s with length <= than the tile's colspan. When such a
+     *    space has been found, the occupied tile positions are incremented by
+     *    the tile's rowspan value, as the positions have become unavailable for
+     *    that many rows.
+     *
+     *    If the end of a row has been reached without finding space for the
+     *    tile, spaceTracker's elements are each decremented by 1.
      */
     function calculateGridFor(colCount, tileSpans) {
       var curCol = 0;
       var curRow = 0;
-      var row = newRowArray();
+      var spaceTracker = newSpaceTracker();
 
-      var positioning = tileSpans.map(function(spans) {
-        return {
-          spans: spans,
-          position: reserveSpace(spans)
-        };
-      });
       return {
-        rowCount: curRow + Math.max.apply(Math, row),
-        positioning: positioning
+        positioning: tileSpans.map(function(spans, i) {
+          return {
+            spans: spans,
+            position: reserveSpace(spans, i)
+          };
+        }),
+        rowCount: curRow + Math.max.apply(Math, spaceTracker)
       }
 
-      function reserveSpace(spans) {
+      function reserveSpace(spans, i) {
+        if (spans.col > colCount) {
+          throw 'md-grid-list: Tile at position ' + i + ' has a colspan ' +
+              '(' + spans.col + ') that exceeds the column count ' +
+              '(' + colCount + ')';
+        }
+
         var start = 0,
             end = 0;
 
@@ -285,7 +302,7 @@ angular.module('gridTestApp')
             continue;
           }
 
-          start = row.indexOf(0, curCol);
+          start = spaceTracker.indexOf(0, curCol);
           if (start === -1) {
             nextRow();
             continue;
@@ -317,24 +334,24 @@ angular.module('gridTestApp')
 
       function adjustRow(from, cols, by) {
         for (var i = from; i < from + cols; i++) {
-          row[i] = Math.max(row[i] + by, 0);
+          spaceTracker[i] = Math.max(spaceTracker[i] + by, 0);
         }
       }
 
       function findEnd(start) {
         var i;
-        for (i = start; i < row.length; i++) {
-          if (row[i] !== 0) {
+        for (i = start; i < spaceTracker.length; i++) {
+          if (spaceTracker[i] !== 0) {
             return i;
           }
         }
 
-        if (i === row.length) {
+        if (i === spaceTracker.length) {
           return i;
         }
       }
 
-      function newRowArray() {
+      function newSpaceTracker() {
         var tracker = [];
         for (var i = 0; i < colCount; i++) {
           tracker.push(0);
