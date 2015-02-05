@@ -70,6 +70,8 @@ angular.module('gridTestApp')
           var performance =
               $$mdGridLayout(colCount, getTileSpans(), getTileElements())
                   .map(function(ps, rowCount, i) {
+                    // TODO(shyndman): There are style caching opportunities
+                    //    here.
                     return {
                       element: angular.element(tiles[i]),
                       styles: getStyles(ps.position, ps.spans,
