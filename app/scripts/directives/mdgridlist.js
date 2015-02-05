@@ -28,8 +28,6 @@ angular.module('gridTestApp')
          */
         function watchMedia() {
           for (var mediaName in $mdConstants.MEDIA) {
-            // TODO(shyndman): It would be nice to only layout if we have
-            // instances of attributes using this media type
             $mdMedia.queries[mediaName].addListener(invalidateLayout);
           }
           return $mdUtil.watchResponsiveAttributes(
