@@ -76,13 +76,13 @@ function mdUtilFactory($mdConstants, $mdMedia, $window) {
     }
 
     // fallback on unprefixed
-    return attrs[attrs.$normalize(attrName)];
+    return attrs[getNormalizedName(attrName)];
   }
 
   function watchResponsiveAttributes(attrNames, attrs, watchFn) {
     var unwatchFns = [];
     attrNames.forEach(function(attrName) {
-      var normalizedName = attrs.$normalize(attrName);
+      var normalizedName = getNormalizedName(attrName);
       if (attrs[normalizedName]) {
         unwatchFns.push(
             attrs.$observe(normalizedName, angular.bind(void 0, watchFn, null)));
