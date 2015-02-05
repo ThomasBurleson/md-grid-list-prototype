@@ -207,7 +207,7 @@ angular.module('gridTestApp')
          * An array of objects describing each tile's position in the grid.
          */
         layoutInfo: function() {
-          return layoutInfo || [];
+          return layoutInfo;
         },
 
         /**
