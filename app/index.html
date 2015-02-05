@@ -24,10 +24,10 @@
         </ul>
       </nav>
       <p>
-        <span class="perf">
+        <span class="perf-total">
           {{mainCtrl.tileCount}} tiles rendered in {{mainCtrl.totalTime}}ms
         </span>
-        <span class="hint">
+        <span class="perf-breakdown">
           layout: {{mainCtrl.layoutTime}}ms,
           style: {{mainCtrl.styleTime}}ms,
           reflow: {{mainCtrl.reflowTime}}ms
@@ -114,9 +114,9 @@
         </section>
         <section class="demo perf" ng-switch-when="perf">
           <md-grid-list
-              gt-md-cols="12" cols="3"
-              gt-md-row-height="1:1" row-height="225"
-              gt-md-gutter="16" gutter="4"
+              gt-md-cols="12" sm-cols="3" md-cols="8"
+              gt-md-row-height="1:1" row-height="4:3"
+              gt-md-gutter="16" gt-sm-gutter="8" gutter="4"
               on-layout="mainCtrl.onLayout($event)">
             <md-grid-tile
                 ng-repeat="tile in mainCtrl.perfTiles"
@@ -124,8 +124,8 @@
                   'background': tile.color
                 }"
                 ng-click="mainCtrl.removeTile(tile)"
-                gt-md-colspan="{{tile.colspan}}"
-                gt-md-rowspan="{{tile.rowspan}}">
+                gt-sm-colspan="{{::tile.colspan}}"
+                gt-sm-rowspan="{{::tile.rowspan}}">
             </md-grid-tile>
           </md-grid-list>
         </section>
