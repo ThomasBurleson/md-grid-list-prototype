@@ -123,7 +123,9 @@
                 ng-style="{
                   'background': tile.color
                 }"
-                ng-click="mainCtrl.removeTile(tile)">
+                ng-click="mainCtrl.removeTile(tile)"
+                gt-md-colspan="{{tile.colspan}}"
+                gt-md-rowspan="{{tile.rowspan}}">
             </md-grid-tile>
           </md-grid-list>
         </section>

@@ -70,10 +70,13 @@ angular.module('gridTestApp')
           var performance =
               $$mdGridLayout(colCount, getTileSpans(), getTileElements())
                   .map(function(ps, rowCount, i) {
+                    var element = angular.element(tiles[i]);
+                    element.scope().$mdGridPosition = ps; // for debugging
+
                     // TODO(shyndman): There are style caching opportunities
                     //    here.
                     return {
-                      element: angular.element(tiles[i]),
+                      element: element,
                       styles: getStyles(ps.position, ps.spans,
                           colCount, rowCount,
                           gutter, rowMode, rowHeight)
@@ -119,7 +122,7 @@ angular.module('gridTestApp')
               break;
 
             case 'ratio':
-              var vShare = hShare * (1 / rowHeight);
+              var vShare = hShare * (1 / rowHeight); // rowHeight is a ratio of width:height
               var vUnit = UNIT({ share: vShare, gutterShare: hGutterShare });
               var marginTop = POSITION({ unit: vUnit, offset: position.row, gutter: position.row * gutter });
               var paddingTop = DIMENSION({ unit: vUnit, span: spans.row, gutter: (spans.row - 1) * gutter});
@@ -306,12 +309,14 @@ angular.module('gridTestApp')
 
           start = spaceTracker.indexOf(0, curCol);
           if (start === -1) {
+            start = end = 0;
             nextRow();
             continue;
           }
 
           end = findEnd(start + 1);
           if (end === -1) {
+            start = end = 0;
             nextRow();
             continue;
           }
