@@ -8,7 +8,7 @@
  */
 angular.module('gridTestApp')
   .directive('mdGridList', function(
-      $$mdGridLayout, $interpolate, $mdConstants, $mdMedia, $mdUtil) {
+      $mdGridLayout, $interpolate, $mdConstants, $mdMedia, $mdUtil) {
     return {
       restrict: 'E',
       controller: MdGridListController,
@@ -68,7 +68,7 @@ angular.module('gridTestApp')
           var rowHeight = getRowHeight();
           var gutter = getGutter();
           var performance =
-              $$mdGridLayout(colCount, getTileSpans(), getTileElements())
+              $mdGridLayout(colCount, getTileSpans(), getTileElements())
                   .map(function(ps, rowCount, i) {
                     var element = angular.element(tiles[i]);
                     element.scope().$mdGridPosition = ps; // for debugging
@@ -209,7 +209,7 @@ angular.module('gridTestApp')
       }
     };
   })
-  .factory('$$mdGridLayout', function($mdUtil) {
+  .factory('$mdGridLayout', function($mdUtil) {
     return function(colCount, tileSpans) {
       var self, layoutInfo, tiles, layoutTime, mapTime, reflowTime, layoutInfo;
       layoutTime = $mdUtil.time(function() {
@@ -239,7 +239,7 @@ angular.module('gridTestApp')
 
         /**
          * Default animator simply sets the element.css( <styles> ).
-         * Use the $$mdGridLayoutProvider to decorate the animator callback if
+         * Use the $mdGridLayoutProvider to decorate the animator callback if
          * alternate animation scenarios are desired.
          */
         reflow: function(customAnimatorFn) {
