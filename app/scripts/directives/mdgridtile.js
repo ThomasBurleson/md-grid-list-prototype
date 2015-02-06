@@ -7,7 +7,7 @@
  * # mdGridItem
  */
 angular.module('gridTestApp')
-  .directive('mdGridTile', function($mdUtil) {
+  .directive('mdGridTile', function($mdMedia) {
     return {
       restrict: 'E',
       require: '^mdGridList',
@@ -27,7 +27,7 @@ angular.module('gridTestApp')
         });
 
         // If our colspan or rowspan changes, trigger a layout
-        var unwatchAttrs = $mdUtil.watchResponsiveAttributes(
+        var unwatchAttrs = $mdMedia.watchResponsiveAttributes(
             ['colspan', 'rowspan'], attrs,
             angular.bind(gridCtrl, gridCtrl.invalidateLayout));
       }

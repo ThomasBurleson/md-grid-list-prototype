@@ -18,9 +18,12 @@ angular.module('gridTestApp')
       link: function postLink(scope, element, attrs, ctrl) {
         element.attr('role', 'list'); // Apply semantics
 
+        // Provide the controller with a way to trigger layouts.
+        ctrl.layoutDelegate = layoutDelegate
+
         var invalidateLayout = angular.bind(ctrl, ctrl.invalidateLayout);
         var unwatchAttrs = watchMedia();
-        scope.$on('$destroy', angular.bind(this, unwatchMedia, unwatchAttrs));
+        scope.$on('$destroy', unwatchMedia);
 
         /**
          * Watches for changes in media, invalidating layout as necessary.
@@ -29,11 +32,11 @@ angular.module('gridTestApp')
           for (var mediaName in $mdConstants.MEDIA) {
             $mdMedia.queries[mediaName].addListener(invalidateLayout);
           }
-          return $mdUtil.watchResponsiveAttributes(
+          return $mdMedia.watchResponsiveAttributes(
               ['cols', 'row-height'], attrs, layoutIfMediaMatch);;
         }
 
-        function unwatchMedia(unwatchAttrs) {
+        function unwatchMedia() {
           unwatchAttrs();
           for (var mediaName in $mdConstants.MEDIA) {
             $mdMedia.queries[mediaName].removeListener(invalidateLayout);
@@ -58,7 +61,7 @@ angular.module('gridTestApp')
          * Invokes the layout engine, and uses its results to lay out our
          * tile elements.
          */
-        ctrl.layoutDelegate = function() {
+        function layoutDelegate() {
           var tiles = getTileElements();
           var colCount = getColumnCount();
           var rowMode = getRowMode();
@@ -91,21 +94,19 @@ angular.module('gridTestApp')
         };
 
         var UNIT = $interpolate(
-            "{{ share }}% - {{ gutterShare }}px");
+            "{{ share }}% - ({{ gutter }} * {{ gutterShare }})");
         var POSITION = $interpolate(
-            "calc(({{ unit }}) * {{ offset }} + {{ gutter }}px)");
+            "calc(({{ unit }}) * {{ offset }} + {{ offset }} * {{ gutter }})");
         var DIMENSION = $interpolate(
-            "calc(({{ unit }}) * {{ span }} + {{ gutter }}px)");
+            "calc(({{ unit }}) * {{ span }} + ({{ span }} - 1) * {{ gutter }})");
 
         // TODO(shyndman): Replace args with a ctx object.
         function getStyles(position, spans, colCount, rowCount, gutter, rowMode, rowHeight) {
           var hShare = (1 / colCount) * 100;
-          var hGutterShare = colCount === 1 ? 0 : gutter * (colCount - 1) / colCount;
-          var hUnit = UNIT({ share: hShare, gutterShare: hGutterShare });
-          var left = POSITION({ unit: hUnit, offset: position.col,
-              gutter: position.col * gutter });
-          var width = DIMENSION({ unit: hUnit, span: spans.col,
-              gutter: (spans.col - 1) * gutter });
+          var hGutterShare = colCount === 1 ? 0 : (colCount - 1) / colCount;
+          var hUnit = UNIT({ share: hShare, gutterShare: hGutterShare, gutter: gutter });
+          var left = POSITION({ unit: hUnit, offset: position.col, gutter: gutter });
+          var width = DIMENSION({ unit: hUnit, span: spans.col, gutter: gutter });
 
           var style = {
             width: width,
@@ -119,31 +120,30 @@ angular.module('gridTestApp')
 
           switch (rowMode) {
             case 'fixed':
-              style['top'] = (position.row * rowHeight) + (position.row * gutter) + 'px';
-              style['height'] = spans.row * rowHeight + 'px';
+              var top = POSITION({ unit: rowHeight, offset: position.row, gutter: gutter });
+              var height = DIMENSION({ unit: rowHeight, span: spans.row, gutter: '0px' });
+              console.log(height);
+              style['top'] = top;
+              style['height'] = height;
               break;
 
             case 'ratio':
               // rowHeight is width / height
               var vShare = hShare * (1 / rowHeight);
-              var vUnit = UNIT({ share: vShare, gutterShare: hGutterShare });
-              var marginTop = POSITION({ unit: vUnit, offset: position.row,
-                  gutter: position.row * gutter });
-              var paddingTop = DIMENSION({ unit: vUnit, span: spans.row,
-                  gutter: (spans.row - 1) * gutter});
+              var vUnit = UNIT({ share: vShare, gutterShare: hGutterShare, gutter: gutter });
+              var marginTop = POSITION({ unit: vUnit, offset: position.row, gutter: gutter });
+              var paddingTop = DIMENSION({ unit: vUnit, span: spans.row, gutter: gutter});
 
               style['paddingTop'] = paddingTop;
               style['marginTop'] = marginTop;
               break;
 
             case 'fit':
-              var vGutterShare = rowCount === 1 ? 0 : (gutter * (rowCount - 1) / rowCount);
+              var vGutterShare = rowCount === 1 ? 0 : (rowCount - 1) / rowCount;
               var vShare = (1 / rowCount) * 100;
-              var vUnit = UNIT({ share: vShare, gutterShare: vGutterShare });
-              var top = POSITION({ unit: vUnit, offset: position.row,
-                  gutter: position.row * gutter });
-              var height = DIMENSION({ unit: vUnit, span: spans.row,
-                  gutter: (spans.row - 1) * gutter });
+              var vUnit = UNIT({ share: vShare, gutterShare: vGutterShare, gutter: gutter });
+              var top = POSITION({ unit: vUnit, offset: position.row, gutter: gutter });
+              var height = DIMENSION({ unit: vUnit, span: spans.row, gutter: gutter });
 
               style['top'] = top;
               style['height'] = height;
@@ -154,6 +154,9 @@ angular.module('gridTestApp')
         }
 
         function getTileElements() {
+          // FIXME(shyndman): This line prevents grids from being inside grids
+          //    querySelector() will :support scope, but we might have to switch
+          //    over to iterating over children and checking the tagName.
           return element[0].querySelectorAll('md-grid-tile');
         }
 
@@ -161,26 +164,26 @@ angular.module('gridTestApp')
           return ctrl.tiles.map(function(tileAttrs) {
             return {
               row: parseInt(
-                  $mdUtil.getResponsiveAttribute(tileAttrs, 'rowspan'), 10) || 1,
+                  $mdMedia.getResponsiveAttribute(tileAttrs, 'rowspan'), 10) || 1,
               col: parseInt(
-                  $mdUtil.getResponsiveAttribute(tileAttrs, 'colspan'), 10) || 1
+                  $mdMedia.getResponsiveAttribute(tileAttrs, 'colspan'), 10) || 1
             };
           });
         }
 
         function getColumnCount() {
-          return parseInt($mdUtil.getResponsiveAttribute(attrs, 'cols'), 10);
+          return parseInt($mdMedia.getResponsiveAttribute(attrs, 'cols'), 10);
         }
 
         function getGutter() {
-          return parseInt($mdUtil.getResponsiveAttribute(attrs, 'gutter'), 10);
+          return applyDefaultUnit($mdMedia.getResponsiveAttribute(attrs, 'gutter') || 1, 'px');
         }
 
         function getRowHeight() {
-          var rowHeight = $mdUtil.getResponsiveAttribute(attrs, 'row-height');
+          var rowHeight = $mdMedia.getResponsiveAttribute(attrs, 'row-height');
           switch (getRowMode()) {
             case 'fixed':
-              return parseInt(rowHeight, 10);
+              return applyDefaultUnit(rowHeight);
             case 'ratio':
               var whRatio = rowHeight.split(':');
               return parseFloat(whRatio[0]) / parseFloat(whRatio[1]);
@@ -190,7 +193,7 @@ angular.module('gridTestApp')
         }
 
         function getRowMode() {
-          var rowHeight = $mdUtil.getResponsiveAttribute(attrs, 'row-height');
+          var rowHeight = $mdMedia.getResponsiveAttribute(attrs, 'row-height');
           if (rowHeight == 'fit') {
             return 'fit';
           } else if (rowHeight.indexOf(':') !== -1) {
@@ -198,6 +201,10 @@ angular.module('gridTestApp')
           } else {
             return 'fixed';
           }
+        }
+
+        function applyDefaultUnit(val) {
+          return /\D$/.test(val) ? val : val + 'px';
         }
       }
     };

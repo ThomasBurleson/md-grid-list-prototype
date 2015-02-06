@@ -30,8 +30,12 @@ function mdConstantFactory() {
 
 
 function mdMediaFactory($mdConstants, $window) {
-  return {
-    queries: buildQueries()
+  var normalizeCache = {};
+  var self;
+  return self = {
+    queries: buildQueries(),
+    watchResponsiveAttributes: watchResponsiveAttributes,
+    getResponsiveAttribute: getResponsiveAttribute
   };
 
   function buildQueries() {
@@ -41,62 +45,40 @@ function mdMediaFactory($mdConstants, $window) {
     });
     return queries;
   }
-}
-
-
-function mdUtilFactory($mdConstants, $mdMedia, $window) {
-  var normalizeCache = {};
-  var now = $window.performance && $window.performance.now ?
-      angular.bind($window.performance, $window.performance.now) :
-      angular.bind(Date, Date.now);
-
-  return {
-    time: time,
-    watchResponsiveAttributes: watchResponsiveAttributes,
-    getResponsiveAttribute: getResponsiveAttribute
-  };
-
-  function time(cb) {
-    var start = now();
-    cb();
-    return now() - start;
-  }
 
   function getResponsiveAttribute(attrs, attrName) {
     for (var i = 0; i < $mdConstants.MEDIA_PRIORITY.length; i++) {
       var mediaName = $mdConstants.MEDIA_PRIORITY[i];
-      if (!$mdMedia.queries[mediaName].matches) {
+      if (!self.queries[mediaName].matches) {
         continue;
       }
 
-      var normalizedName = getNormalizedName(attrs, mediaName + '-' + attrName);
+      var normalizedName = getNormalizedName(attrs, attrName + '-' + mediaName);
       if (attrs[normalizedName]) {
         return attrs[normalizedName];
       }
     }
 
     // fallback on unprefixed
-    return attrs[getNormalizedName(attrName)];
+    return attrs[getNormalizedName(attrs, attrName)];
   }
 
   function watchResponsiveAttributes(attrNames, attrs, watchFn) {
     var unwatchFns = [];
     attrNames.forEach(function(attrName) {
-      var normalizedName = getNormalizedName(attrName);
+      var normalizedName = getNormalizedName(attrs, attrName);
       if (attrs[normalizedName]) {
         unwatchFns.push(
             attrs.$observe(normalizedName, angular.bind(void 0, watchFn, null)));
       }
 
       for (var mediaName in $mdConstants.MEDIA) {
-        var normalizedName = getNormalizedName(attrs, mediaName + '-' + attrName);
+        var normalizedName = getNormalizedName(attrs, attrName + '-' + mediaName);
         if (!attrs[normalizedName]) {
           return;
         }
 
-        unwatchFns.push(
-            attrs.$observe(
-                normalizedName, angular.bind(void 0, watchFn, mediaName)));
+        unwatchFns.push(attrs.$observe(normalizedName, angular.bind(void 0, watchFn, mediaName)));
       }
     });
 
@@ -109,6 +91,23 @@ function mdUtilFactory($mdConstants, $mdMedia, $window) {
   function getNormalizedName(attrs, attrName) {
     return normalizeCache[attrName] ||
         (normalizeCache[attrName] = attrs.$normalize(attrName));
+  }
+}
+
+
+function mdUtilFactory($mdConstants, $window) {
+  var now = $window.performance && $window.performance.now ?
+      angular.bind($window.performance, $window.performance.now) :
+      angular.bind(Date, Date.now);
+
+  return {
+    time: time
+  };
+
+  function time(cb) {
+    var start = now();
+    cb();
+    return now() - start;
   }
 }
 
