@@ -3,6 +3,7 @@
 
 /**
  * @ngdoc directive
+
  * @name gridTestApp.directive:mdGridList
  * @description
  */
@@ -105,12 +106,10 @@ angular.module('gridTestApp')
           var hShare = (1 / colCount) * 100;
           var hGutterShare = colCount === 1 ? 0 : (colCount - 1) / colCount;
           var hUnit = UNIT({ share: hShare, gutterShare: hGutterShare, gutter: gutter });
-          var left = POSITION({ unit: hUnit, offset: position.col, gutter: gutter });
-          var width = DIMENSION({ unit: hUnit, span: spans.col, gutter: gutter });
 
           var style = {
-            width: width,
-            left: left,
+            left: POSITION({ unit: hUnit, offset: position.col, gutter: gutter }),
+            width: DIMENSION({ unit: hUnit, span: spans.col, gutter: gutter }),
             // resets
             paddingTop: '',
             marginTop: '',
@@ -120,33 +119,28 @@ angular.module('gridTestApp')
 
           switch (rowMode) {
             case 'fixed':
-              var top = POSITION({ unit: rowHeight, offset: position.row, gutter: gutter });
-              var height = DIMENSION({ unit: rowHeight, span: spans.row, gutter: '0px' });
-              console.log(height);
-              style['top'] = top;
-              style['height'] = height;
+              style.top = POSITION({ unit: rowHeight, offset: position.row, gutter: gutter });
+              style.height = DIMENSION({ unit: rowHeight, span: spans.row, gutter: '0px' });
               break;
 
             case 'ratio':
               // rowHeight is width / height
               var vShare = hShare * (1 / rowHeight);
               var vUnit = UNIT({ share: vShare, gutterShare: hGutterShare, gutter: gutter });
-              var marginTop = POSITION({ unit: vUnit, offset: position.row, gutter: gutter });
-              var paddingTop = DIMENSION({ unit: vUnit, span: spans.row, gutter: gutter});
 
-              style['paddingTop'] = paddingTop;
-              style['marginTop'] = marginTop;
+              console.log(DIMENSION({ unit: vUnit, span: spans.row, gutter: gutter}));
+
+              style.paddingTop = DIMENSION({ unit: vUnit, span: spans.row, gutter: gutter});
+              style.marginTop = POSITION({ unit: vUnit, offset: position.row, gutter: gutter });
               break;
 
             case 'fit':
               var vGutterShare = rowCount === 1 ? 0 : (rowCount - 1) / rowCount;
               var vShare = (1 / rowCount) * 100;
               var vUnit = UNIT({ share: vShare, gutterShare: vGutterShare, gutter: gutter });
-              var top = POSITION({ unit: vUnit, offset: position.row, gutter: gutter });
-              var height = DIMENSION({ unit: vUnit, span: spans.row, gutter: gutter });
 
-              style['top'] = top;
-              style['height'] = height;
+              style.top = POSITION({ unit: vUnit, offset: position.row, gutter: gutter });
+              style.height = DIMENSION({ unit: vUnit, span: spans.row, gutter: gutter });
               break;
           }
 
@@ -387,37 +381,39 @@ angular.module('gridTestApp')
     this.layoutDelegate;
   }
 
-  MdGridListController.prototype.addTile = function(tileAttrs, idx) {
-    if (angular.isUndefined(idx)) {
-      this.tiles.push(tileAttrs);
-    } else {
-      this.tiles.splice(idx, 0, tileAttrs);
-    }
-    this.invalidateLayout();
-  };
+  MdGridListController.prototype = {
+    addTile: function(tileAttrs, idx) {
+      if (angular.isUndefined(idx)) {
+        this.tiles.push(tileAttrs);
+      } else {
+        this.tiles.splice(idx, 0, tileAttrs);
+      }
+      this.invalidateLayout();
+    },
 
-  MdGridListController.prototype.removeTile = function(tileAttrs) {
-    var idx = this.tiles.indexOf(tileAttrs);
-    if (idx === -1) {
-      return;
-    }
-    this.tiles.splice(idx, 1);
-    this.invalidateLayout();
-  };
+    removeTile: function(tileAttrs) {
+      var idx = this.tiles.indexOf(tileAttrs);
+      if (idx === -1) {
+        return;
+      }
+      this.tiles.splice(idx, 1);
+      this.invalidateLayout();
+    },
 
-  MdGridListController.prototype.invalidateLayout = function(tile) {
-    if (this.invalidated) {
-      return;
-    }
-    this.invalidated = true;
-    this.$timeout_(angular.bind(this, this.layout));
-  };
+    invalidateLayout: function(tile) {
+      if (this.invalidated) {
+        return;
+      }
+      this.invalidated = true;
+      this.$timeout_(angular.bind(this, this.layout));
+    },
 
-  MdGridListController.prototype.layout = function() {
-    try {
-      this.layoutDelegate();
-    } finally {
-      this.invalidated = false;
+    layout: function() {
+      try {
+        this.layoutDelegate();
+      } finally {
+        this.invalidated = false;
+      }
     }
   };
 })();

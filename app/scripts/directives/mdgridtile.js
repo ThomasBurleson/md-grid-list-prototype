@@ -17,6 +17,10 @@ angular.module('gridTestApp')
         // Apply semantics
         element.attr('role', 'listitem');
 
+        // If our colspan or rowspan changes, trigger a layout
+        var unwatchAttrs = $mdMedia.watchResponsiveAttributes(
+            ['colspan', 'rowspan'], attrs, angular.bind(gridCtrl, gridCtrl.invalidateLayout));
+
         // Tile registration/deregistration
         // TODO(shyndman): Kind of gross to access parent scope like this.
         //    Consider other options.
@@ -25,11 +29,6 @@ angular.module('gridTestApp')
           unwatchAttrs();
           gridCtrl.removeTile(attrs);
         });
-
-        // If our colspan or rowspan changes, trigger a layout
-        var unwatchAttrs = $mdMedia.watchResponsiveAttributes(
-            ['colspan', 'rowspan'], attrs,
-            angular.bind(gridCtrl, gridCtrl.invalidateLayout));
       }
     };
   });
